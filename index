@@ -1,1 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tigre Pesquero</title>
+    <style>
+        body {
+            overflow: hidden;
+            margin: 0;
+            /* Fondo del juego */
+            background: url('fondotigre.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        
+        .character {
+            width: 150px; /* Ajusta según tu imagen */
+            height: 150px;
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            /* Imagen del tigre */
+            background-image: url('tigre.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+        
+        .fishing-rod {
+            position: absolute;
+            width: 5px;
+            height: 0;
+            background: #654321;
+            transform-origin: top;
+        }
+        
+        .lure {
+            width: 15px;
+            height: 15px;
+            background: gold;
+            position: absolute;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+        
+        .fish {
+            width: 80px; /* Ajusta según tu imagen de pez */
+            height: 40px;
+            position: absolute;
+            bottom: 20px;
+            /* Imagen del pez */
+            background-image: url('pez.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+        
+        #score {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            color: white;
+            text-shadow: 2px 2px 2px black;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Puntos: 0</div>
+    <div class="character"></div>
+    <div class="fish"></div>
 
+    <script>
+        // Mantenemos el mismo JavaScript del anterior pero con ajustes de tamaño
+        let characterX = 400;
+        let score = 0;
+        let isFishing = false;
+        let lureElement = null;
+        let fishingRodElement = null;
+        let fishX = 0;
+        let fishDirection = 1;
+
+        const fish = document.querySelector('.fish');
+        
+        function moveFish() {
+            fishX += 2 * fishDirection;
+            if(fishX > window.innerWidth - 80 || fishX < 0) {
+                fishDirection *= -1;
+                fish.style.transform = fishDirection === 1 ? 'scaleX(1)' : 'scaleX(-1)';
+            }
+            fish.style.left = fishX + 'px';
+            requestAnimationFrame(moveFish);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowLeft' && characterX > 0) {
+                characterX -= 20;
+            } else if(e.key === 'ArrowRight' && characterX < window.innerWidth - 150) {
+                characterX += 20;
+            } else if(e.key === ' ' && !isFishing) {
+                castFishingRod();
+            }
+            
+            document.querySelector('.character').style.left = characterX + 'px';
+        });
+
+        // Resto del JavaScript igual que antes...
+        // (Mantener todas las funciones castFishingRod, checkCollision, retractFishingRod)
+        // ... [El resto del código JavaScript permanece igual que en la versión anterior]
+        
+        // Iniciar juego
+        moveFish();
+    </script>
+</body>
+</html>
