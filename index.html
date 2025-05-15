@@ -2,143 +2,444 @@
 <html>
 <head>
     <title>Tigre Pesquero</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body {
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+            background-color: #f0f0f0;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #logo-area {
+            height: 60px;
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        #game-area {
+            flex-grow: 1;
+            position: relative;
             overflow: hidden;
         }
+        
         #gameCanvas {
             display: block;
-            background: #fff;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #87CEEB 0%, #1E90FF 100%);
         }
-        #score {
+        
+        #controls-area {
+            height: 80px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            border-radius: 50%;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        #lives-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .life {
+            width: 30px;
+            height: 30px;
+            background-color: #FF5252;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        #score-container {
             position: absolute;
             top: 10px;
             left: 10px;
-            color: #222;
+            color: white;
             font-size: 24px;
-            text-shadow: 2px 2px 2px #fff;
-            z-index: 10;
+            text-shadow: 2px 2px 2px black;
         }
     </style>
 </head>
 <body>
-    <div id="score">Puntos: 0</div>
-    <canvas id="gameCanvas" width="900" height="500"></canvas>
+    <div id="game-container">
+        <div id="logo-area">
+            <div id="logo">Espacio para logo.jpg</div>
+        </div>
+        
+        <div id="game-area">
+            <canvas id="gameCanvas"></canvas>
+            <div id="lives-container">
+                <div class="life">♥</div>
+                <div class="life">♥</div>
+                <div class="life">♥</div>
+            </div>
+            <div id="score-container">Puntos: 0</div>
+        </div>
+        
+        <div id="controls-area">
+            <button id="left-btn" class="control-btn">←</button>
+            <button id="fish-btn" class="control-btn">⚓</button>
+            <button id="right-btn" class="control-btn">→</button>
+        </div>
+    </div>
+    
     <script>
-        // Cargar imágenes
-        const tigre = new Image();
-        tigre.src = 'tigre.jpg';
-        const pez = new Image();
-        pez.src = 'pez.jpg';
-
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-
+        let gameRunning = true;
+        
+        // Ajustar el tamaño del canvas
+        function resizeCanvas() {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
         // Estado del juego
-        let puntos = 0;
-        let tigreX = canvas.width / 2 - 75;
-        const tigreY = canvas.height - 170;
-        const tigreW = 150, tigreH = 150;
-        let pezX = 100, pezY = 350, pezW = 80, pezH = 40;
-        let pezDir = 2;
-        let lanzando = false;
-        let anzueloY = tigreY + 40;
-        let anzueloX = tigreX + tigreW / 2;
-
-        // Movimiento del pez
-        function moverPez() {
-            pezX += pezDir;
-            if (pezX < 0 || pezX > canvas.width - pezW) {
-                pezDir *= -1;
+        let score = 0;
+        let lives = 3;
+        
+        // Cargar imágenes
+        const tigreImg = new Image();
+        tigreImg.src = 'tigre.jpg';
+        const pezImg = new Image();
+        pezImg.src = 'pez.jpg';
+        
+        // Objeto tigre (pescador)
+        const tigre = {
+            x: canvas.width / 2 - 75,
+            y: canvas.height - 170,
+            width: 100,
+            height: 100,
+            speed: 10,
+            draw: function() {
+                ctx.drawImage(tigreImg, this.x, this.y, this.width, this.height);
             }
-        }
-
-        // Dibuja todo
-        function dibujar() {
-            // Fondo blanco
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, canvas.width, canvas.height); // [6]
-
-            // Pez
-            ctx.drawImage(pez, pezX, pezY, pezW, pezH);
-            // Tigre
-            ctx.drawImage(tigre, tigreX, tigreY, tigreW, tigreH);
-            // Caña y anzuelo
-            ctx.strokeStyle = "#654321";
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(tigreX + tigreW / 2, tigreY + 40);
-            if (lanzando) {
-                ctx.lineTo(anzueloX, anzueloY);
+        };
+        
+        // Objeto caña de pescar
+        const cana = {
+            fishing: false,
+            hookX: tigre.x + tigre.width / 2,
+            hookY: tigre.y,
+            hookSize: 10,
+            lineSpeed: 5,
+            lineLength: 0,
+            maxLength: canvas.height - tigre.y - 50,
+            draw: function() {
+                // Dibuja la línea
+                ctx.beginPath();
+                ctx.moveTo(tigre.x + tigre.width / 2, tigre.y + 20);
+                ctx.lineTo(this.hookX, tigre.y + 20 + this.lineLength);
+                ctx.strokeStyle = "#654321";
+                ctx.lineWidth = 2;
                 ctx.stroke();
+                
+                // Dibuja el anzuelo
                 ctx.fillStyle = "gold";
                 ctx.beginPath();
-                ctx.arc(anzueloX, anzueloY, 10, 0, 2 * Math.PI);
+                ctx.arc(this.hookX, tigre.y + 20 + this.lineLength, this.hookSize, 0, 2 * Math.PI);
                 ctx.fill();
-            } else {
-                ctx.lineTo(tigreX + tigreW / 2, tigreY + 70);
-                ctx.stroke();
-                ctx.fillStyle = "gold";
-                ctx.beginPath();
-                ctx.arc(tigreX + tigreW / 2, tigreY + 70, 10, 0, 2 * Math.PI);
-                ctx.fill();
-            }
-        }
-
-        // Animación principal
-        function loop() {
-            moverPez();
-            if (lanzando) {
-                anzueloY += 6;
-                if (anzueloY > canvas.height) {
-                    lanzarFin();
+                
+                // Actualiza la posición del anzuelo
+                if (this.fishing) {
+                    this.lineLength += this.lineSpeed;
+                    if (this.lineLength > this.maxLength) {
+                        this.lineSpeed = -this.lineSpeed;
+                    }
+                    if (this.lineLength <= 0) {
+                        this.fishing = false;
+                        this.lineLength = 0;
+                    }
                 }
-                // Colisión con pez
-                if (
-                    anzueloX > pezX && anzueloX < pezX + pezW &&
-                    anzueloY > pezY && anzueloY < pezY + pezH
-                ) {
-                    puntos++;
-                    document.getElementById('score').innerText = "Puntos: " + puntos;
-                    lanzarFin();
-                    // Mueve el pez a otra posición
-                    pezX = Math.random() * (canvas.width - pezW);
+                
+                this.hookX = tigre.x + tigre.width / 2;
+            },
+            cast: function() {
+                if (!this.fishing) {
+                    this.fishing = true;
+                    this.lineLength = 0;
+                    this.lineSpeed = 5;
                 }
             }
-            dibujar();
-            requestAnimationFrame(loop);
+        };
+        
+        // Peces
+        const peces = [];
+        function crearPez() {
+            const size = 40 + Math.random() * 20;
+            const speed = 2 + Math.random() * 3;
+            const startLeft = Math.random() > 0.5;
+            const pezNuevo = {
+                x: startLeft ? -size : canvas.width,
+                y: Math.random() * (canvas.height - 200) + 100,
+                width: size * 2,
+                height: size,
+                speed: startLeft ? speed : -speed,
+                draw: function() {
+                    // Dibuja el pez horizontalmente (corrige la orientación)
+                    if (this.speed > 0) {
+                        ctx.save();
+                        ctx.scale(-1, 1); // Voltea horizontalmente
+                        ctx.drawImage(pezImg, -this.x - this.width, this.y, this.width, this.height);
+                        ctx.restore();
+                    } else {
+                        ctx.drawImage(pezImg, this.x, this.y, this.width, this.height);
+                    }
+                },
+                move: function() {
+                    this.x += this.speed;
+                    // Si el pez sale del canvas, lo eliminamos
+                    return (this.x > canvas.width + 50 || this.x < -this.width - 50);
+                }
+            };
+            return pezNuevo;
         }
-
-        function lanzarInicio() {
-            if (!lanzando) {
-                lanzando = true;
-                anzueloY = tigreY + 40;
-                anzueloX = tigreX + tigreW / 2;
-            }
+        
+        // Obstáculos (generados programáticamente, no imágenes)
+        const obstaculos = [];
+        function crearObstaculo() {
+            const colores = ["#FF5252", "#7C4DFF", "#FF9800", "#607D8B"];
+            const size = 30 + Math.random() * 20;
+            const speed = 1 + Math.random() * 2;
+            const startLeft = Math.random() > 0.5;
+            const color = colores[Math.floor(Math.random() * colores.length)];
+            const tipo = Math.floor(Math.random() * 3); // 0: círculo, 1: cuadrado, 2: triángulo
+            
+            const obstaculoNuevo = {
+                x: startLeft ? -size : canvas.width,
+                y: Math.random() * (canvas.height - 200) + 50,
+                size: size,
+                speed: startLeft ? speed : -speed,
+                color: color,
+                tipo: tipo,
+                rotacion: 0,
+                draw: function() {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotacion);
+                    ctx.fillStyle = this.color;
+                    
+                    if (this.tipo === 0) {
+                        // Círculo
+                        ctx.beginPath();
+                        ctx.arc(0, 0, this.size / 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (this.tipo === 1) {
+                        // Cuadrado
+                        ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                    } else {
+                        // Triángulo
+                        ctx.beginPath();
+                        ctx.moveTo(0, -this.size / 2);
+                        ctx.lineTo(this.size / 2, this.size / 2);
+                        ctx.lineTo(-this.size / 2, this.size / 2);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                    
+                    ctx.restore();
+                },
+                move: function() {
+                    this.x += this.speed;
+                    this.rotacion += 0.02;
+                    return (this.x > canvas.width + 50 || this.x < -this.size - 50);
+                }
+            };
+            return obstaculoNuevo;
         }
-
-        function lanzarFin() {
-            lanzando = false;
-        }
-
-        // Controles
+        
+        // Manejo de eventos táctiles y de teclado
+        document.getElementById('left-btn').addEventListener('touchstart', moveLeft);
+        document.getElementById('left-btn').addEventListener('mousedown', moveLeft);
+        document.getElementById('right-btn').addEventListener('touchstart', moveRight);
+        document.getElementById('right-btn').addEventListener('mousedown', moveRight);
+        document.getElementById('fish-btn').addEventListener('touchstart', castFishing);
+        document.getElementById('fish-btn').addEventListener('mousedown', castFishing);
+        
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'ArrowLeft') {
-                tigreX = Math.max(0, tigreX - 20);
-            }
-            if (e.key === 'ArrowRight') {
-                tigreX = Math.min(canvas.width - tigreW, tigreX + 20);
-            }
-            if (e.key === ' ') {
-                lanzarInicio();
-            }
+            if (e.key === 'ArrowLeft') moveLeft();
+            if (e.key === 'ArrowRight') moveRight();
+            if (e.key === ' ') castFishing();
         });
-
-        // Inicia el juego cuando las imágenes estén cargadas
-        tigre.onload = pez.onload = function() {
-            dibujar();
-            loop();
+        
+        function moveLeft() {
+            tigre.x = Math.max(0, tigre.x - tigre.speed);
+        }
+        
+        function moveRight() {
+            tigre.x = Math.min(canvas.width - tigre.width, tigre.x + tigre.speed);
+        }
+        
+        function castFishing() {
+            cana.cast();
+        }
+        
+        // Comprueba colisiones entre el anzuelo y los peces
+        function checkCollisions() {
+            if (!cana.fishing) return;
+            
+            const hookX = cana.hookX;
+            const hookY = tigre.y + 20 + cana.lineLength;
+            
+            // Comprobar colisiones con peces
+            for (let i = peces.length - 1; i >= 0; i--) {
+                const p = peces[i];
+                if (hookX > p.x && hookX < p.x + p.width &&
+                   hookY > p.y && hookY < p.y + p.height) {
+                    // ¡Pescado atrapado!
+                    peces.splice(i, 1);
+                    score++;
+                    document.getElementById('score-container').innerHTML = "Puntos: " + score;
+                    cana.fishing = false;
+                    cana.lineLength = 0;
+                }
+            }
+            
+            // Comprobar colisiones con obstáculos
+            for (let i = obstaculos.length - 1; i >= 0; i--) {
+                const o = obstaculos[i];
+                const distancia = Math.sqrt(Math.pow(hookX - o.x, 2) + Math.pow(hookY - o.y, 2));
+                if (distancia < o.size / 2 + cana.hookSize) {
+                    // ¡Colisión con obstáculo!
+                    obstaculos.splice(i, 1);
+                    lives--;
+                    updateLives();
+                    cana.fishing = false;
+                    cana.lineLength = 0;
+                    
+                    if (lives <= 0) {
+                        gameRunning = false;
+                        setTimeout(function() {
+                            alert("¡Juego terminado! Tu puntuación: " + score);
+                            resetGame();
+                        }, 100);
+                    }
+                }
+            }
+        }
+        
+        // Actualiza el display de vidas
+        function updateLives() {
+            const lifeElements = document.querySelectorAll('.life');
+            for (let i = 0; i < lifeElements.length; i++) {
+                if (i < lives) {
+                    lifeElements[i].style.opacity = "1";
+                } else {
+                    lifeElements[i].style.opacity = "0.3";
+                }
+            }
+        }
+        
+        // Reset del juego
+        function resetGame() {
+            score = 0;
+            lives = 3;
+            updateLives();
+            document.getElementById('score-container').innerHTML = "Puntos: 0";
+            peces.length = 0;
+            obstaculos.length = 0;
+            tigre.x = canvas.width / 2 - 75;
+            gameRunning = true;
+            gameLoop();
+        }
+        
+        // Crear nuevos peces periódicamente
+        setInterval(function() {
+            if (gameRunning && peces.length < 5) {
+                peces.push(crearPez());
+            }
+        }, 2000);
+        
+        // Crear nuevos obstáculos periódicamente
+        setInterval(function() {
+            if (gameRunning && obstaculos.length < 3) {
+                obstaculos.push(crearObstaculo());
+            }
+        }, 3000);
+        
+        // Loop principal del juego
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Actualizar y dibujar peces
+            for (let i = peces.length - 1; i >= 0; i--) {
+                if (peces[i].move()) {
+                    peces.splice(i, 1);
+                } else {
+                    peces[i].draw();
+                }
+            }
+            
+            // Actualizar y dibujar obstáculos
+            for (let i = obstaculos.length - 1; i >= 0; i--) {
+                if (obstaculos[i].move()) {
+                    obstaculos.splice(i, 1);
+                } else {
+                    obstaculos[i].draw();
+                }
+            }
+            
+            // Dibujar tigre y caña
+            tigre.draw();
+            cana.draw();
+            
+            // Comprobar colisiones
+            checkCollisions();
+            
+            // Continuar el loop
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Iniciar el juego cuando las imágenes estén cargadas
+        tigreImg.onload = pezImg.onload = function() {
+            gameLoop();
         };
     </script>
 </body>
