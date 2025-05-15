@@ -25,7 +25,7 @@
             background: #ffffff;
         }
 
-        #game-container {
+#game-container {
             position: relative;
             width: 100%;
             max-width: 600px;
@@ -35,18 +35,15 @@
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
-
         #header {
             text-align: center;
             margin-bottom: 20px;
         }
-
         #logo {
             width: 200px;
             height: auto;
             margin: 0 auto 15px;
         }
-
         #canvas-wrapper {
             position: relative;
             width: 100%;
@@ -56,7 +53,6 @@
             background: #e9ecef;
             border: 2px solid #dee2e6;
         }
-
         #game-canvas {
             position: absolute;
             top: 0;
@@ -174,17 +170,14 @@
         <div id="header">
             <img id="logo" src="logo.png" alt="Logo del juego">
         </div>
-        
         <div id="canvas-wrapper">
             <canvas id="game-canvas"></canvas>
-            
             <div id="score-display">Puntos: 0</div>
             <div id="lives-display">
                 <div class="life"></div>
                 <div class="life"></div>
                 <div class="life"></div>
             </div>
-            
             <div id="game-over">
                 <h2>¡Juego Terminado!</h2>
                 <p>Puntuación final: <span id="final-score">0</span></p>
@@ -192,15 +185,12 @@
             </div>
         </div>
     </div>
-
     <button id="start-btn">Comenzar Juego</button>
-    
     <div id="controls">
         <button class="control-btn" id="left-btn">←</button>
         <button class="control-btn" id="action-btn">⚓</button>
         <button class="control-btn" id="right-btn">→</button>
     </div>
-
     <script>
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
@@ -214,16 +204,16 @@
                 height: 100,
                 speed: 8,
                 x: 0,
-                y: 0
+                y: 0 // Se define dinámicamente
             },
             pez: {
                 width: 60,
                 height: 40,
-                speed: 3
+                speed: 1.5 // Más lento
             },
             cana: {
                 velocidad: 8,
-                longitudMaxima: 300,
+                longitudMaxima: 220,
                 activa: false,
                 longitud: 0,
                 anzueloSize: 15
@@ -232,10 +222,12 @@
             puntuacion: 0
         };
 
+        // Zona de agua (porcentaje desde arriba)
+        let aguaY = 0, aguaHeight = 0;
         // Estados del juego
         let peces = [];
         let obstaculos = [];
-        
+
         // Cargar imágenes
         const tigreImg = new Image();
         tigreImg.src = 'tigre.png';
@@ -245,16 +237,15 @@
         function initGame() {
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
-            
-            // Event listeners
+
             document.getElementById('start-btn').addEventListener('click', startGame);
             document.getElementById('restart-btn').addEventListener('click', resetGame);
-            
+
             ['left-btn', 'right-btn', 'action-btn'].forEach(id => {
                 document.getElementById(id).addEventListener('touchstart', handleControl);
                 document.getElementById(id).addEventListener('mousedown', handleControl);
             });
-            
+
             document.addEventListener('keydown', handleKeyPress);
         }
 
@@ -262,9 +253,14 @@
             const wrapper = document.getElementById('canvas-wrapper');
             canvas.width = wrapper.offsetWidth;
             canvas.height = wrapper.offsetHeight;
-            
-            config.tigre.y = canvas.height - config.tigre.height - 20;
+
+            // El tigre estará arriba, fuera del agua
+            config.tigre.y = 10; // 10 px del borde superior
             config.tigre.x = canvas.width/2 - config.tigre.width/2;
+
+            // Agua ocupa el 70% inferior del canvas
+            aguaY = config.tigre.y + config.tigre.height - 10;
+            aguaHeight = canvas.height - aguaY;
         }
 
         function startGame() {
@@ -281,7 +277,6 @@
 
         function gameLoop() {
             if (!gameRunning) return;
-            
             updateGame();
             drawGame();
             animationFrameId = requestAnimationFrame(gameLoop);
@@ -291,80 +286,86 @@
             // Mover caña
             if (config.cana.activa) {
                 config.cana.longitud += config.cana.velocidad;
-                
                 if (config.cana.longitud >= config.cana.longitudMaxima) {
                     config.cana.activa = false;
                     config.cana.longitud = 0;
                 }
-                
                 checkCollisions();
             }
-            
             // Mover peces
             peces.forEach(pez => {
                 pez.x += pez.direccion * pez.velocidad;
-                if (pez.x < -pez.width || pez.x > canvas.width) {
-                    peces.splice(peces.indexOf(pez), 1);
+                // Si sale por un borde, reaparece por el otro
+                if (pez.direccion === 1 && pez.x > canvas.width) {
+                    pez.x = -pez.width;
+                    pez.y = aguaY + Math.random() * (aguaHeight - config.pez.height - 10);
+                } else if (pez.direccion === -1 && pez.x < -pez.width) {
+                    pez.x = canvas.width;
+                    pez.y = aguaY + Math.random() * (aguaHeight - config.pez.height - 10);
                 }
             });
-            
-            // Generar nuevos peces
-            if (Math.random() < 0.02) {
+            // Generar nuevos peces (máximo 3)
+            if (peces.length < 3 && Math.random() < 0.01) {
+                const dir = Math.random() > 0.5 ? 1 : -1;
                 peces.push({
-                    x: Math.random() > 0.5 ? -60 : canvas.width,
-                    y: Math.random() * (canvas.height - 100),
+                    x: dir === 1 ? -config.pez.width : canvas.width,
+                    y: aguaY + Math.random() * (aguaHeight - config.pez.height - 10),
                     width: config.pez.width,
                     height: config.pez.height,
-                    direccion: Math.random() > 0.5 ? 1 : -1,
-                    velocidad: config.pez.speed
+                    direccion: dir,
+                    velocidad: config.pez.speed + Math.random() * 0.5
                 });
             }
         }
 
         function drawGame() {
-            // Limpiar canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Dibujar tigre
-            ctx.drawImage(tigreImg, config.tigre.x, config.tigre.y, 
-                         config.tigre.width, config.tigre.height);
-            
-            // Dibujar caña
+
+            // Dibujar agua (degradado)
+            const grad = ctx.createLinearGradient(0, aguaY, 0, canvas.height);
+            grad.addColorStop(0, "#6ec6ff");
+            grad.addColorStop(1, "#1565c0");
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, aguaY, canvas.width, aguaHeight);
+
+            // Dibujar tigre (sentado arriba del agua)
+            ctx.drawImage(tigreImg, config.tigre.x, config.tigre.y, config.tigre.width, config.tigre.height);
+
+            // Dibujar caña (sale desde el centro inferior del tigre)
             if (config.cana.activa) {
                 ctx.beginPath();
-                ctx.moveTo(config.tigre.x + config.tigre.width/2, config.tigre.y);
-                ctx.lineTo(config.tigre.x + config.tigre.width/2, 
-                          config.tigre.y + config.cana.longitud);
+                ctx.moveTo(config.tigre.x + config.tigre.width/2, config.tigre.y + config.tigre.height - 5);
+                ctx.lineTo(config.tigre.x + config.tigre.width/2, config.tigre.y + config.tigre.height - 5 + config.cana.longitud);
                 ctx.strokeStyle = '#654321';
                 ctx.lineWidth = 4;
                 ctx.stroke();
-                
-                // Dibujar anzuelo
+                // Anzuelo
                 ctx.beginPath();
-                ctx.arc(config.tigre.x + config.tigre.width/2, 
-                       config.tigre.y + config.cana.longitud, 
-                       config.cana.anzueloSize, 0, Math.PI * 2);
+                ctx.arc(config.tigre.x + config.tigre.width/2, config.tigre.y + config.tigre.height - 5 + config.cana.longitud, config.cana.anzueloSize, 0, Math.PI * 2);
                 ctx.fillStyle = 'gold';
                 ctx.fill();
             }
-            
+
             // Dibujar peces
             peces.forEach(pez => {
                 ctx.save();
-                if (pez.direccion === -1) ctx.scale(-1, 1);
-                ctx.drawImage(pezImg, pez.direccion === 1 ? pez.x : -pez.x - pez.width, 
-                             pez.y, pez.width, pez.height);
+                if (pez.direccion === -1) {
+                    ctx.translate(pez.x + pez.width / 2, pez.y + pez.height / 2);
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(pezImg, -pez.width/2, -pez.height/2, pez.width, pez.height);
+                } else {
+                    ctx.drawImage(pezImg, pez.x, pez.y, pez.width, pez.height);
+                }
                 ctx.restore();
             });
         }
 
         function checkCollisions() {
             const anzueloX = config.tigre.x + config.tigre.width/2;
-            const anzueloY = config.tigre.y + config.cana.longitud;
-            
+            const anzueloY = config.tigre.y + config.tigre.height - 5 + config.cana.longitud;
             peces.forEach((pez, index) => {
                 if (anzueloX > pez.x && anzueloX < pez.x + pez.width &&
-                   anzueloY > pez.y && anzueloY < pez.y + pez.height) {
+                    anzueloY > pez.y && anzueloY < pez.y + pez.height) {
                     config.puntuacion += 10;
                     peces.splice(index, 1);
                     updateDisplay();
@@ -382,12 +383,11 @@
         function handleControl(e) {
             e.preventDefault();
             switch(e.target.id) {
-                case 'left-btn': 
+                case 'left-btn':
                     config.tigre.x = Math.max(0, config.tigre.x - config.tigre.speed);
                     break;
-                case 'right-btn': 
-                    config.tigre.x = Math.min(canvas.width - config.tigre.width, 
-                                           config.tigre.x + config.tigre.speed);
+                case 'right-btn':
+                    config.tigre.x = Math.min(canvas.width - config.tigre.width, config.tigre.x + config.tigre.speed);
                     break;
                 case 'action-btn':
                     if (!config.cana.activa) {
@@ -400,9 +400,9 @@
 
         function handleKeyPress(e) {
             switch(e.key) {
-                case 'ArrowLeft': handleControl({target: {id: 'left-btn'}}); break;
-                case 'ArrowRight': handleControl({target: {id: 'right-btn'}}); break;
-                case ' ': handleControl({target: {id: 'action-btn'}}); break;
+                case 'ArrowLeft': handleControl({target: {id: 'left-btn'}, preventDefault: ()=>{}}); break;
+                case 'ArrowRight': handleControl({target: {id: 'right-btn'}, preventDefault: ()=>{}}); break;
+                case ' ': handleControl({target: {id: 'action-btn'}, preventDefault: ()=>{}}); break;
             }
         }
 
