@@ -3,70 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tigre Pesquero</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Tigre Pesquero - Versión Final</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: 'Poppins', sans-serif;
-            color: #333;
-            overflow: hidden;
-            touch-action: manipulation;
-            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: #f0f8ff;
+            font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background: #ffffff;
+            min-height: 100vh;
         }
 
         #game-container {
-            position: relative;
             width: 100%;
             max-width: 800px;
-            margin: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 15px;
+            position: relative;
         }
 
-        #logo {
-            width: 250px;
-            height: auto;
-            margin: 0 auto 20px;
-            display: block;
-        }
-
-        #start-screen {
+        #music-control {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
-            text-align: center;
+            top: 15px;
+            right: 15px;
+            z-index: 100;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        #music-control img {
+            width: 40px;
+            height: 40px;
         }
 
         #canvas-wrapper {
             position: relative;
             width: 100%;
-            padding-bottom: 100%;
-            border-radius: 8px;
-            overflow: hidden;
-            background: #e9ecef;
-            border: 2px solid #dee2e6;
+            padding-bottom: 60%;
+            margin: 15px 0;
         }
 
         #game-canvas {
@@ -75,376 +54,268 @@
             left: 0;
             width: 100%;
             height: 100%;
+            background: linear-gradient(to bottom, #87CEEB 0%, #1E90FF 100%);
+            border-radius: 10px;
         }
 
         #controls {
-            margin-top: 20px;
             display: flex;
-            gap: 15px;
             justify-content: center;
-            position: relative;
+            gap: 15px;
+            margin-top: 20px;
         }
 
         .control-btn {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            border: 2px solid #4dabf7;
-            background: #e7f5ff;
-            color: #228be6;
-            font-size: 28px;
+            border: none;
+            background: #4CAF50;
+            color: white;
+            font-size: 24px;
             cursor: pointer;
-            transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
         }
 
-        #music-control {
-            position: absolute;
-            left: 20px;
-            bottom: 20px;
-            z-index: 5;
-        }
-
-        #score-display {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            font-size: 20px;
-            color: #495057;
-            z-index: 2;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 15px;
-            border-radius: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        .control-btn:active {
+            transform: scale(0.95);
         }
 
         #lives-display {
             position: absolute;
             top: 15px;
-            right: 15px;
-            display: flex;
-            gap: 10px;
-            z-index: 2;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 15px;
-            border-radius: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            left: 15px;
+            font-size: 32px;
+            color: #ff4444;
+            z-index: 100;
         }
 
-        .life {
-            font-size: 24px;
-            color: #ff5252;
-        }
-
-        #game-over {
+        #score-display {
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        #playlist-image {
             width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            z-index: 10;
-        }
-
-        #start-btn {
-            padding: 15px 35px;
-            font-size: 18px;
-            background: #4dabf7;
-            border: none;
-            border-radius: 25px;
-            color: white;
-            cursor: pointer;
-            margin: 20px;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(77, 171, 247, 0.3);
-        }
-
-        #restart-btn {
-            background: #4dabf7;
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 20px;
-            cursor: pointer;
+            max-width: 800px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
     </style>
 </head>
 <body>
-    <button id="music-control" class="control-btn">
-        <i class="fas fa-volume-up"></i>
-    </button>
-
     <div id="game-container">
-        <img id="logo" src="logo.png" alt="Logo del juego">
-        
-        <div id="start-screen">
-            <button id="start-btn">Comenzar Juego</button>
-        </div>
+        <button id="music-control">
+            <img src="https://cdn-icons-png.flaticon.com/512/727/727241.png" alt="Música">
+        </button>
         
         <div id="canvas-wrapper">
             <canvas id="game-canvas"></canvas>
+            <div id="lives-display">❤️❤️❤️</div>
             <div id="score-display">Puntos: 0</div>
-            <div id="lives-display">
-                <div class="life">❤️</div>
-                <div class="life">❤️</div>
-                <div class="life">❤️</div>
-            </div>
-            <div id="game-over">
-                <h2>¡Juego Terminado!</h2>
-                <p>Puntuación final: <span id="final-score">0</span></p>
-                <button id="restart-btn">Reiniciar</button>
-            </div>
+        </div>
+
+        <div id="controls">
+            <button class="control-btn" id="left-btn">←</button>
+            <button class="control-btn" id="action-btn">⚓</button>
+            <button class="control-btn" id="right-btn">→</button>
         </div>
     </div>
-    
-    <div id="controls">
-        <button class="control-btn" id="action-btn">⚓</button>
-    </div>
 
-    <!-- Audio -->
+    <img id="playlist-image" src="playlist.jpg" alt="Playlist">
+
+    <!-- Música libre de derechos: "K-Pop" de AlexiAction (modificar créditos según necesidad real) -->
     <audio id="bg-music" loop>
-        <source src="https://assets.mixkit.co/music/preview/mixkit-k-pop-dance-165.mp3" type="audio/mpeg">
+        <source src="https://cdn.pixabay.com/download/audio/2023/10/30/audio_3c5a7d8d98.mp3" type="audio/mpeg">
     </audio>
-    <audio id="fish-sound" src="https://assets.mixkit.co/active_preview/sounds/2096.mp3"></audio>
-    <audio id="bottle-sound" src="https://assets.mixkit.co/active_preview/sounds/2223.mp3"></audio>
 
     <script>
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
-        let gameRunning = false;
-        let animationFrameId;
+        const musicButton = document.getElementById('music-control');
+        const bgMusic = document.getElementById('bg-music');
+        let musicPlaying = true;
 
         // Configuración del juego
         const config = {
-            tigre: {
-                width: 120,
-                height: 168,
-                x: 0,
-                y: 0
-            },
-            pez: {
-                width: 84,
-                height: 120,
-                speed: 1.5
-            },
-            cana: {
-                velocidad: 8,
-                longitudMaxima: 0,
-                activa: false,
-                longitud: 0,
-                anzueloSize: 20
-            },
+            tigre: { width: 100, height: 120, speed: 10 },
+            pez: { width: 50, height: 30, baseSpeed: 1.5 }, // Tamaño ajustado
+            cana: { velocidad: 8, longitudMaxima: 250, anzueloSize: 12 },
+            obstaculo: { minSize: 20, maxSize: 40 }, // Tamaño reducido
             vidas: 3,
-            puntuacion: 0,
-            obstaculos: {
-                spawnRate: 0.005,
-                speed: 1.2,
-                max: 2,
-                width: 72,
-                height: 120
-            }
+            puntuacion: 0
         };
 
         // Variables del juego
-        let aguaY = 0, aguaHeight = 0;
+        let tigreX = 0;
+        let aguaY = 0;
         let peces = [];
         let obstaculos = [];
+        let canaActiva = false;
+        let canaLongitud = 0;
+        let gameRunning = false;
 
-        // Elementos de audio
-        const bgMusic = document.getElementById('bg-music');
-        const fishSound = document.getElementById('fish-sound');
-        const bottleSound = document.getElementById('bottle-sound');
-        const musicButton = document.getElementById('music-control');
-        let isMusicOn = false;
-
-        // Imágenes
+        // Cargar imágenes
         const tigreImg = new Image();
-        tigreImg.src = 'tigre.png';
+        tigreImg.src = 'tigre.jpg';
+        
         const pezImg = new Image();
-        pezImg.src = 'pez.png';
-        const botellaImg = new Image();
-        botellaImg.src = 'botella.png';
+        pezImg.src = 'pez.jpg';
 
         function initGame() {
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
-
-            // Event listeners
-            document.getElementById('start-btn').addEventListener('click', startGame);
-            document.getElementById('restart-btn').addEventListener('click', resetGame);
-            document.getElementById('action-btn').addEventListener('click', lanzarCana);
-            document.addEventListener('keydown', handleKeyPress);
+            
             musicButton.addEventListener('click', toggleMusic);
+            document.getElementById('left-btn').addEventListener('mousedown', moveLeft);
+            document.getElementById('right-btn').addEventListener('mousedown', moveRight);
+            document.getElementById('action-btn').addEventListener('mousedown', lanzarCana);
+            document.addEventListener('keydown', handleKeyPress);
+            
+            bgMusic.play();
+            startGame();
         }
 
         function resizeCanvas() {
             const wrapper = document.getElementById('canvas-wrapper');
             canvas.width = wrapper.offsetWidth;
             canvas.height = wrapper.offsetHeight;
-
-            config.tigre.x = canvas.width/2 - config.tigre.width/2;
-            config.tigre.y = 20;
-            aguaY = config.tigre.y + config.tigre.height;
-            aguaHeight = canvas.height - aguaY;
-            config.cana.longitudMaxima = aguaHeight - 20;
+            
+            tigreX = canvas.width/2 - config.tigre.width/2;
+            aguaY = canvas.height * 0.3;
         }
 
         function startGame() {
-            if (!gameRunning) {
-                document.getElementById('start-screen').style.display = 'none';
-                gameRunning = true;
-                config.vidas = 3;
-                config.puntuacion = 0;
-                peces = [];
-                obstaculos = [];
-                updateDisplay();
-                gameLoop();
-            }
+            gameRunning = true;
+            gameLoop();
         }
 
         function gameLoop() {
             if (!gameRunning) return;
+            
             updateGame();
             drawGame();
-            animationFrameId = requestAnimationFrame(gameLoop);
+            requestAnimationFrame(gameLoop);
         }
 
         function updateGame() {
-            if (config.cana.activa) {
-                config.cana.longitud += config.cana.velocidad;
-                if (config.cana.longitud >= config.cana.longitudMaxima) {
-                    config.cana.activa = false;
-                    config.cana.longitud = 0;
+            // Movimiento de la caña
+            if (canaActiva) {
+                canaLongitud += config.cana.velocidad;
+                if (canaLongitud >= config.cana.longitudMaxima) {
+                    canaActiva = false;
+                    canaLongitud = 0;
                 }
                 checkCollisions();
             }
 
-            moveEntities(peces);
-            moveEntities(obstaculos);
-
-            generateFish();
-            generateObstacles();
-        }
-
-        function lanzarCana() {
-            if (!config.cana.activa) {
-                config.cana.activa = true;
-                config.cana.longitud = 0;
-            }
-        }
-
-        function handleKeyPress(e) {
-            if (e.key === ' ') lanzarCana();
-        }
-
-        function toggleMusic() {
-            isMusicOn = !isMusicOn;
-            if(isMusicOn) {
-                bgMusic.play();
-                musicButton.innerHTML = '<i class="fas fa-volume-up"></i>';
-            } else {
-                bgMusic.pause();
-                musicButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
-            }
-        }
-
-        function moveEntities(entities) {
-            entities.forEach(entity => {
-                entity.x += entity.direccion * entity.velocidad;
-                if (entity.x < -entity.width) entity.x = canvas.width;
-                if (entity.x > canvas.width) entity.x = -entity.width;
+            // Movimiento de peces
+            peces.forEach(pez => {
+                pez.x += pez.direccion * pez.velocidad;
+                if (pez.x > canvas.width + pez.width) pez.x = -pez.width;
+                if (pez.x < -pez.width) pez.x = canvas.width + pez.width;
             });
-        }
 
-        function generateFish() {
-            if (peces.length < 3 && Math.random() < 0.02) {
-                peces.push(createEntity('pez'));
-            }
-        }
+            // Movimiento de obstáculos
+            obstaculos.forEach(obs => {
+                obs.x += obs.direccion * obs.velocidad;
+                if (obs.x > canvas.width + obs.size) obs.x = -obs.size;
+                if (obs.x < -obs.size) obs.x = canvas.width + obs.size;
+            });
 
-        function generateObstacles() {
-            const difficulty = Math.min(1, config.puntuacion / 1000);
-            if (obstaculos.length < config.obstaculos.max + Math.floor(difficulty * 3) && 
-                Math.random() < config.obstaculos.spawnRate + (difficulty * 0.005)) {
-                obstaculos.push(createEntity('piedra'));
-            }
-        }
-
-        function createEntity(type) {
-            const dir = Math.random() > 0.5 ? 1 : -1;
-            return {
-                x: dir === 1 ? -config.obstaculos.width : canvas.width,
-                y: aguaY + Math.random() * (aguaHeight - config.obstaculos.height),
-                width: type === 'pez' ? config.pez.width : config.obstaculos.width,
-                height: type === 'pez' ? config.pez.height : config.obstaculos.height,
-                direccion: dir,
-                velocidad: type === 'pez' ? 
-                    config.pez.speed : 
-                    config.obstaculos.speed + (Math.random() * 0.5),
-                type: type
-            };
+            // Generar nuevos elementos
+            if (peces.length < 3 && Math.random() < 0.02) crearPez();
+            if (obstaculos.length < 2 && Math.random() < 0.01) crearObstaculo();
         }
 
         function drawGame() {
+            // Fondo
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Fondo de agua
+            
+            // Agua
             const grad = ctx.createLinearGradient(0, aguaY, 0, canvas.height);
             grad.addColorStop(0, "#87CEEB");
             grad.addColorStop(1, "#1E90FF");
             ctx.fillStyle = grad;
-            ctx.fillRect(0, aguaY, canvas.width, aguaHeight);
+            ctx.fillRect(0, aguaY, canvas.width, canvas.height - aguaY);
 
-            // Dibujar tigre
-            ctx.drawImage(tigreImg, config.tigre.x, config.tigre.y, 
-                         config.tigre.width, config.tigre.height);
+            // Tigre
+            ctx.drawImage(tigreImg, tigreX, 10, config.tigre.width, config.tigre.height);
 
-            // Dibujar caña
-            if (config.cana.activa) {
-                const startY = config.tigre.y + config.tigre.height - 10;
+            // Caña
+            if (canaActiva) {
                 ctx.beginPath();
-                ctx.moveTo(config.tigre.x + config.tigre.width/2, startY);
-                ctx.lineTo(config.tigre.x + config.tigre.width/2, startY + config.cana.longitud);
+                ctx.moveTo(tigreX + config.tigre.width/2, 10 + config.tigre.height - 5);
+                ctx.lineTo(tigreX + config.tigre.width/2, 10 + config.tigre.height - 5 + canaLongitud);
                 ctx.strokeStyle = '#654321';
                 ctx.lineWidth = 4;
                 ctx.stroke();
-
+                
                 ctx.beginPath();
-                ctx.arc(config.tigre.x + config.tigre.width/2, 
-                       startY + config.cana.longitud, 
-                       config.cana.anzueloSize, 0, Math.PI * 2);
+                ctx.arc(tigreX + config.tigre.width/2, 10 + config.tigre.height - 5 + canaLongitud, config.cana.anzueloSize, 0, Math.PI*2);
                 ctx.fillStyle = 'gold';
                 ctx.fill();
             }
 
-            // Dibujar elementos
-            drawEntities(peces, pezImg);
-            drawEntities(obstaculos, botellaImg);
-        }
-
-        function drawEntities(entities, img) {
-            entities.forEach(entity => {
+            // Peces
+            peces.forEach(pez => {
                 ctx.save();
-                if (entity.direccion === -1) {
-                    ctx.translate(entity.x + entity.width/2, entity.y + entity.height/2);
+                if (pez.direccion === -1) {
+                    ctx.translate(pez.x + pez.width/2, pez.y + pez.height/2);
                     ctx.scale(-1, 1);
-                    ctx.drawImage(img, -entity.width/2, -entity.height/2, 
-                                entity.width, entity.height);
+                    ctx.drawImage(pezImg, -pez.width/2, -pez.height/2, pez.width, pez.height);
                 } else {
-                    ctx.drawImage(img, entity.x, entity.y, 
-                                entity.width, entity.height);
+                    ctx.drawImage(pezImg, pez.x, pez.y, pez.width, pez.height);
                 }
                 ctx.restore();
+            });
+
+            // Obstáculos (botellas)
+            obstaculos.forEach(obs => {
+                ctx.fillStyle = '#607D8B';
+                ctx.beginPath();
+                ctx.roundRect(obs.x, obs.y, obs.size/2, obs.size, [5]);
+                ctx.fill();
+                ctx.strokeStyle = '#455A64';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+        }
+
+        function crearPez() {
+            const direccion = Math.random() > 0.5 ? 1 : -1;
+            peces.push({
+                x: direccion === 1 ? -config.pez.width : canvas.width,
+                y: aguaY + Math.random() * (canvas.height - aguaY - config.pez.height),
+                width: config.pez.width,
+                height: config.pez.height,
+                direccion: direccion,
+                velocidad: config.pez.baseSpeed + Math.random() * 0.5
+            });
+        }
+
+        function crearObstaculo() {
+            const size = config.obstaculo.minSize + Math.random() * (config.obstaculo.maxSize - config.obstaculo.minSize);
+            obstaculos.push({
+                x: Math.random() > 0.5 ? -size : canvas.width,
+                y: aguaY + Math.random() * (canvas.height - aguaY - size),
+                size: size,
+                direccion: Math.random() > 0.5 ? 1 : -1,
+                velocidad: 0.8 + Math.random() * 0.5
             });
         }
 
         function checkCollisions() {
-            const anzueloX = config.tigre.x + config.tigre.width/2;
-            const anzueloY = config.tigre.y + config.tigre.height - 10 + config.cana.longitud;
+            const anzueloX = tigreX + config.tigre.width/2;
+            const anzueloY = 10 + config.tigre.height - 5 + canaLongitud;
 
             // Colisión con peces
             peces.forEach((pez, index) => {
@@ -452,50 +323,63 @@
                     anzueloY > pez.y && anzueloY < pez.y + pez.height) {
                     config.puntuacion += 10;
                     peces.splice(index, 1);
-                    fishSound.currentTime = 0;
-                    fishSound.play();
                     updateDisplay();
                 }
             });
 
             // Colisión con obstáculos
-            obstaculos.forEach((obstaculo, index) => {
-                const distancia = Math.sqrt(
-                    Math.pow(anzueloX - (obstaculo.x + obstaculo.width/2), 2) +
-                    Math.pow(anzueloY - (obstaculo.y + obstaculo.height/2), 2)
-                );
-                
-                if(distancia < (config.cana.anzueloSize + obstaculo.width/2)) {
+            obstaculos.forEach((obs, index) => {
+                if (anzueloX > obs.x && anzueloX < obs.x + obs.size/2 &&
+                    anzueloY > obs.y && anzueloY < obs.y + obs.size) {
                     config.vidas--;
-                    obstaculos.splice(index, 1);
-                    bottleSound.currentTime = 0;
-                    bottleSound.play();
                     updateDisplay();
-                    if(config.vidas <= 0) gameOver();
+                    obstaculos.splice(index, 1);
+                    
+                    if (config.vidas <= 0) {
+                        gameRunning = false;
+                        alert(`¡Juego terminado! Puntuación: ${config.puntuacion}`);
+                    }
                 }
             });
         }
 
         function updateDisplay() {
             document.getElementById('score-display').textContent = `Puntos: ${config.puntuacion}`;
-            document.querySelectorAll('.life').forEach((life, index) => {
-                life.style.opacity = index < config.vidas ? 1 : 0.3;
-            });
+            document.getElementById('lives-display').textContent = '❤️'.repeat(config.vidas);
         }
 
-        function gameOver() {
-            gameRunning = false;
-            document.getElementById('game-over').style.display = 'flex';
-            document.getElementById('final-score').textContent = config.puntuacion;
+        function toggleMusic() {
+            musicPlaying = !musicPlaying;
+            musicPlaying ? bgMusic.play() : bgMusic.pause();
+            musicButton.style.opacity = musicPlaying ? 1 : 0.5;
         }
 
-        function resetGame() {
-            document.getElementById('game-over').style.display = 'none';
-            startGame();
+        function moveLeft() {
+            tigreX = Math.max(0, tigreX - config.tigre.speed);
         }
 
-        // Iniciar el juego
-        initGame();
+        function moveRight() {
+            tigreX = Math.min(canvas.width - config.tigre.width, tigreX + config.tigre.speed);
+        }
+
+        function lanzarCana() {
+            if (!canaActiva) {
+                canaActiva = true;
+                canaLongitud = 0;
+            }
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'ArrowLeft') moveLeft();
+            if (e.key === 'ArrowRight') moveRight();
+            if (e.key === ' ') lanzarCana();
+        }
+
+        // Iniciar el juego cuando las imágenes carguen
+        Promise.all([
+            new Promise(resolve => tigreImg.onload = resolve),
+            new Promise(resolve => pezImg.onload = resolve)
+        ]).then(initGame);
     </script>
 </body>
 </html>
