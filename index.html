@@ -6,7 +6,6 @@
     <title>Tigre Pesquero</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
         * {
             box-sizing: border-box;
             margin: 0;
@@ -25,6 +24,13 @@
             padding: 20px;
             overflow-x: hidden;
         }
+    .header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
 
         #game-container {
             position: relative;
@@ -38,10 +44,8 @@
         }
 
         #logo {
-            width: 250px;
+            width: 200px;
             height: auto;
-            margin: 0 auto 20px;
-            display: block;
         }
 
         #start-screen {
@@ -98,12 +102,12 @@
         }
 
         #music-control {
-            position: absolute;
+            position: fixed;
+            top: 20px;
             right: 20px;
-            bottom: 20px;
             z-index: 5;
         }
-
+    
         #score-display {
             position: absolute;
             top: 15px;
@@ -172,26 +176,31 @@
             cursor: pointer;
         }
 
-        .music-message {
+         .music-message {
             text-align: center;
-            margin: 30px 0 15px;
+            margin: 15px 0;
             font-size: 14px;
             color: #666;
         }
-
+    
         #playlist {
-            width: 200px;
-            margin: 0 auto 30px;
-            display: block;
+            width: 150px;
+            height: auto;
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         @media (max-width: 600px) {
             #game-container {
-                margin: 10px;
-                padding: 15px;
-            }
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
             
             .control-btn {
                 width: 60px;
@@ -202,9 +211,12 @@
     </style>
 </head>
 <body>
-    <div id="game-container">
+    <div class="header">
         <img id="logo" src="logo.png" alt="Logo del juego">
-        
+        <img id="playlist" src="playlist.jpg" alt="Playlist">
+    </div>
+
+    <div id="game-container">
         <div id="start-screen">
             <button id="start-btn">Comenzar Juego</button>
         </div>
@@ -225,7 +237,7 @@
         </div>
     </div>
     
-    <div id="controls">
+     <div id="controls">
         <button class="control-btn" id="action-btn">⚓</button>
     </div>
 
@@ -242,8 +254,12 @@
     <audio id="bg-music" loop>
         <source src="musicaTigre.mp3" type="audio/mpeg">
     </audio>
-    <audio id="fish-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-game-alert-316.mp3"></audio>
-    <audio id="bottle-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-glass-break-with-huge-reverb-390.mp3"></audio>
+    <audio id="pesca">
+        <source src="pesca.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="botellaChoque">
+        <source src="botellaChoque.mp3" type="audio/mpeg">
+    </audio>
     <script>
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
@@ -272,12 +288,12 @@
             },
             vidas: 3,
             puntuacion: 0,
-            obstaculos: {
-                spawnRate: 0.01,  // Aumentar frecuencia
-                speed: 1.5,
+           obstaculos: {
+                spawnRate: 0.008,
+                speed: 1.8,
                 max: 3,
-                width: 40,        // Reducir tamaño
-                height: 60       // Reducir tamaño
+                width: 40,  // Tamaño reducido
+                height: 50  // Tamaño reducido
             }
         };
 
@@ -288,8 +304,8 @@
 
         // Elementos de audio
         const bgMusic = document.getElementById('bg-music');
-        const fishSound = document.getElementById('fish-sound');
-        const bottleSound = document.getElementById('bottle-sound');
+       const fishSound = document.getElementById('pesca');
+        const bottleSound = document.getElementById('botellaChoque');
         const musicButton = document.getElementById('music-control');
         let isMusicOn = false;
 
@@ -413,8 +429,7 @@
             const dir = Math.random() > 0.5 ? 1 : -1;
             return {
                 x: dir === 1 ? -config.obstaculos.width : canvas.width,
-                // Ajustar posición vertical aleatoria
-                y: aguaY + 20 + Math.random() * (aguaHeight - 100),
+                y: aguaY + 30 + Math.random() * (aguaHeight - 80), // Ajuste posición vertical
                 width: type === 'pez' ? config.pez.width : config.obstaculos.width,
                 height: type === 'pez' ? config.pez.height : config.obstaculos.height,
                 direccion: dir,
@@ -424,11 +439,14 @@
                 type: type
             };
         }
-function playSound(audioElement) {
-            audioElement.currentTime = 0;
-            audioElement.play().catch(error => {
-                console.log('La reproducción automática fue prevenida:', error);
-            });
+        
+function playSound(sound) {
+            sound.currentTime = 0;
+            if (isMusicOn) {
+                sound.play().catch(error => {
+                    console.log('Error al reproducir sonido:', error);
+                });
+            }
         }
 
         function drawGame() {
@@ -494,7 +512,7 @@ function playSound(audioElement) {
                     anzueloY > pez.y && anzueloY < pez.y + pez.height) {
                     config.puntuacion += 10;
                     peces.splice(index, 1);
-                    playSound(fishSound);  // Cambiado aquí
+                    playSound(fishSound);
                     updateDisplay();
                 }
             });
@@ -509,11 +527,10 @@ function playSound(audioElement) {
                 if(distancia < (config.cana.anzueloSize + obstaculo.width/2)) {
                     config.vidas--;
                     obstaculos.splice(index, 1);
-                    playSound(bottleSound);  // Cambiado aquí
+                    playSound(bottleSound);
                     updateDisplay();
                     if(config.vidas <= 0) gameOver();
                 }
-     
             });
         }
 
