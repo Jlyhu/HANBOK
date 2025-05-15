@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tigre Pesquero</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * {
             box-sizing: border-box;
@@ -12,7 +13,7 @@
             padding: 0;
         }
 
-       body {
+        body {
             font-family: 'Poppins', sans-serif;
             color: #333;
             overflow: hidden;
@@ -25,10 +26,10 @@
             background: #ffffff;
         }
 
-         #game-container {
+        #game-container {
             position: relative;
             width: 100%;
-            max-width: 800px; /* Contenedor más grande */
+            max-width: 800px;
             margin: 20px;
             padding: 20px;
             background: #f8f9fa;
@@ -37,7 +38,7 @@
         }
 
         #logo {
-            width: 250px; /* Logo más grande */
+            width: 250px;
             height: auto;
             margin: 0 auto 20px;
             display: block;
@@ -61,7 +62,7 @@
         #canvas-wrapper {
             position: relative;
             width: 100%;
-            padding-bottom: 100%; /* Relación 1:1 */
+            padding-bottom: 100%;
             border-radius: 8px;
             overflow: hidden;
             background: #e9ecef;
@@ -76,7 +77,7 @@
             height: 100%;
         }
 
-         #controls {
+        #controls {
             margin-top: 20px;
             display: flex;
             gap: 15px;
@@ -85,7 +86,7 @@
         }
 
         .control-btn {
-            width: 70px; /* Botones más grandes */
+            width: 70px;
             height: 70px;
             border-radius: 50%;
             border: 2px solid #4dabf7;
@@ -96,37 +97,11 @@
             transition: all 0.2s;
         }
 
-        .control-btn:active {
-            background: #d0ebff;
-            transform: scale(0.95);
-        }
-
-        #game-over {
+        #music-control {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            z-index: 10;
-        }
-
-        #start-btn {
-            padding: 12px 30px;
-            font-size: 16px;
-            background: #4dabf7;
-            border: none;
-            border-radius: 25px;
-            color: white;
-            cursor: pointer;
-            margin: 20px;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(77, 171, 247, 0.3);
+            left: 20px;
+            bottom: 20px;
+            z-index: 5;
         }
 
         #score-display {
@@ -160,9 +135,32 @@
             color: #ff5252;
         }
 
-        #game-over h2 {
-            color: #495057;
-            margin-bottom: 15px;
+        #game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 10;
+        }
+
+        #start-btn {
+            padding: 15px 35px;
+            font-size: 18px;
+            background: #4dabf7;
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            margin: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(77, 171, 247, 0.3);
         }
 
         #restart-btn {
@@ -173,16 +171,13 @@
             border-radius: 20px;
             cursor: pointer;
         }
-
-         #music-control {
-            position: absolute;
-            left: 20px;
-            bottom: 20px;
-            z-index: 5;
-        }
     </style>
 </head>
 <body>
+    <button id="music-control" class="control-btn">
+        <i class="fas fa-volume-up"></i>
+    </button>
+
     <div id="game-container">
         <img id="logo" src="logo.png" alt="Logo del juego">
         
@@ -205,29 +200,12 @@
             </div>
         </div>
     </div>
-
-     <button id="music-control" class="control-btn">
-        <i class="fas fa-volume-up"></i>
-    </button>
-
-    <div id="game-container">
-        <img id="logo" src="logo.png" alt="Logo del juego">
-        
-        <div id="start-screen">
-            <button id="start-btn">Comenzar Juego</button>
-        </div>
-        
-        <div id="canvas-wrapper">
-            <canvas id="game-canvas"></canvas>
-            <!-- Elementos de UI... -->
-        </div>
-    </div>
     
     <div id="controls">
         <button class="control-btn" id="action-btn">⚓</button>
     </div>
 
-     <!-- Audio -->
+    <!-- Audio -->
     <audio id="bg-music" loop>
         <source src="https://assets.mixkit.co/music/preview/mixkit-k-pop-dance-165.mp3" type="audio/mpeg">
     </audio>
@@ -240,28 +218,10 @@
         let gameRunning = false;
         let animationFrameId;
 
-         // Configuración de audio
-        const bgMusic = document.getElementById('bg-music');
-        const fishSound = document.getElementById('fish-sound');
-        const bottleSound = document.getElementById('bottle-sound');
-        const musicButton = document.getElementById('music-control');
-        let isMusicOn = false;
-
-        // Control de música
-        musicButton.addEventListener('click', () => {
-            isMusicOn = !isMusicOn;
-            if(isMusicOn) {
-                bgMusic.play();
-                musicButton.innerHTML = '<i class="fas fa-volume-up"></i>';
-            } else {
-                bgMusic.pause();
-                musicButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
-            }
-        });
-
-const config = {
+        // Configuración del juego
+        const config = {
             tigre: {
-                width: 120,  // Ajustado
+                width: 120,
                 height: 168,
                 x: 0,
                 y: 0
@@ -276,7 +236,7 @@ const config = {
                 longitudMaxima: 0,
                 activa: false,
                 longitud: 0,
-                anzueloSize: 20  // Aumentado para mejor visibilidad
+                anzueloSize: 20
             },
             vidas: 3,
             puntuacion: 0,
@@ -284,17 +244,24 @@ const config = {
                 spawnRate: 0.005,
                 speed: 1.2,
                 max: 2,
-                width: 90,   // Tamaño para botella
-                height: 150  // Relación botella
+                width: 72,
+                height: 120
             }
         };
-        
-        //
+
+        // Variables del juego
         let aguaY = 0, aguaHeight = 0;
         let peces = [];
         let obstaculos = [];
 
-         // Cargar imágenes
+        // Elementos de audio
+        const bgMusic = document.getElementById('bg-music');
+        const fishSound = document.getElementById('fish-sound');
+        const bottleSound = document.getElementById('bottle-sound');
+        const musicButton = document.getElementById('music-control');
+        let isMusicOn = false;
+
+        // Imágenes
         const tigreImg = new Image();
         tigreImg.src = 'tigre.png';
         const pezImg = new Image();
@@ -302,28 +269,16 @@ const config = {
         const botellaImg = new Image();
         botellaImg.src = 'botella.png';
 
-
         function initGame() {
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
 
+            // Event listeners
             document.getElementById('start-btn').addEventListener('click', startGame);
             document.getElementById('restart-btn').addEventListener('click', resetGame);
-            document.getElementById('action-btn').addEventListener('click', () => {
-                if (!config.cana.activa) {
-                    config.cana.activa = true;
-                    config.cana.longitud = 0;
-                }
-            });
-
-            document.addEventListener('keydown', e => {
-                if (e.key === ' ') {
-                    if (!config.cana.activa) {
-                        config.cana.activa = true;
-                        config.cana.longitud = 0;
-                    }
-                }
-            });
+            document.getElementById('action-btn').addEventListener('click', lanzarCana);
+            document.addEventListener('keydown', handleKeyPress);
+            musicButton.addEventListener('click', toggleMusic);
         }
 
         function resizeCanvas() {
@@ -375,6 +330,28 @@ const config = {
             generateObstacles();
         }
 
+        function lanzarCana() {
+            if (!config.cana.activa) {
+                config.cana.activa = true;
+                config.cana.longitud = 0;
+            }
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === ' ') lanzarCana();
+        }
+
+        function toggleMusic() {
+            isMusicOn = !isMusicOn;
+            if(isMusicOn) {
+                bgMusic.play();
+                musicButton.innerHTML = '<i class="fas fa-volume-up"></i>';
+            } else {
+                bgMusic.pause();
+                musicButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            }
+        }
+
         function moveEntities(entities) {
             entities.forEach(entity => {
                 entity.x += entity.direccion * entity.velocidad;
@@ -397,7 +374,6 @@ const config = {
             }
         }
 
-        // Modificar función createEntity para obstáculos
         function createEntity(type) {
             const dir = Math.random() > 0.5 ? 1 : -1;
             return {
@@ -416,18 +392,18 @@ const config = {
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Agua con degradado
+            // Fondo de agua
             const grad = ctx.createLinearGradient(0, aguaY, 0, canvas.height);
             grad.addColorStop(0, "#87CEEB");
             grad.addColorStop(1, "#1E90FF");
             ctx.fillStyle = grad;
             ctx.fillRect(0, aguaY, canvas.width, aguaHeight);
 
-            // Tigre
+            // Dibujar tigre
             ctx.drawImage(tigreImg, config.tigre.x, config.tigre.y, 
                          config.tigre.width, config.tigre.height);
 
-            // Caña
+            // Dibujar caña
             if (config.cana.activa) {
                 const startY = config.tigre.y + config.tigre.height - 10;
                 ctx.beginPath();
@@ -445,9 +421,9 @@ const config = {
                 ctx.fill();
             }
 
-            // Peces y obstáculos
+            // Dibujar elementos
             drawEntities(peces, pezImg);
-            drawObstacles();
+            drawEntities(obstaculos, botellaImg);
         }
 
         function drawEntities(entities, img) {
@@ -466,49 +442,23 @@ const config = {
             });
         }
 
-        // Modificar función drawObstacles
-        function drawObstacles() {
-            obstaculos.forEach(obstaculo => {
-                ctx.save();
-                if (obstaculo.direccion === -1) {
-                    ctx.translate(obstaculo.x + obstaculo.width/2, obstaculo.y + obstaculo.height/2);
-                    ctx.scale(-1, 1);
-                    ctx.drawImage(botellaImg, -obstaculo.width/2, -obstaculo.height/2, 
-                                obstaculo.width, obstaculo.height);
-                } else {
-                    ctx.drawImage(botellaImg, obstaculo.x, obstaculo.y, 
-                                obstaculo.width, obstaculo.height);
-                }
-                ctx.restore();
-            });
-        }
-
         function checkCollisions() {
-            // Colisión con pez
-            if (/* detección de pez */) {
-                fishSound.currentTime = 0;
-                fishSound.play();
-            }
-
-            // Colisión con botella
-            if (/* detección de botella */) {
-                bottleSound.currentTime = 0;
-                bottleSound.play();
-            }
             const anzueloX = config.tigre.x + config.tigre.width/2;
             const anzueloY = config.tigre.y + config.tigre.height - 10 + config.cana.longitud;
 
-            // Peces
+            // Colisión con peces
             peces.forEach((pez, index) => {
                 if (anzueloX > pez.x && anzueloX < pez.x + pez.width &&
                     anzueloY > pez.y && anzueloY < pez.y + pez.height) {
                     config.puntuacion += 10;
                     peces.splice(index, 1);
+                    fishSound.currentTime = 0;
+                    fishSound.play();
                     updateDisplay();
                 }
             });
 
-            // Obstáculos
+            // Colisión con obstáculos
             obstaculos.forEach((obstaculo, index) => {
                 const distancia = Math.sqrt(
                     Math.pow(anzueloX - (obstaculo.x + obstaculo.width/2), 2) +
@@ -518,6 +468,8 @@ const config = {
                 if(distancia < (config.cana.anzueloSize + obstaculo.width/2)) {
                     config.vidas--;
                     obstaculos.splice(index, 1);
+                    bottleSound.currentTime = 0;
+                    bottleSound.play();
                     updateDisplay();
                     if(config.vidas <= 0) gameOver();
                 }
@@ -542,6 +494,7 @@ const config = {
             startGame();
         }
 
+        // Iniciar el juego
         initGame();
     </script>
 </body>
