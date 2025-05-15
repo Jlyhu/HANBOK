@@ -306,7 +306,7 @@
             document.addEventListener('keydown', handleKeyPress);
             musicButton.addEventListener('click', toggleMusic);
         }
-
+         initGame();
         function resizeCanvas() {
             const wrapper = document.getElementById('canvas-wrapper');
             canvas.width = wrapper.offsetWidth;
@@ -501,7 +501,7 @@
             startGame();
         }
 
-        initGame();
+       
     </script>
 </body>
 </html>
