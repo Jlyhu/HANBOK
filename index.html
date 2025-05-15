@@ -242,13 +242,8 @@
     <audio id="bg-music" loop>
         <source src="musicaTigre.mp3" type="audio/mpeg">
     </audio>
-    <audio id="fish-sound">
-        <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU" type="audio/wav">
-    </audio>
-    <audio id="bottle-sound">
-        <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YV" type="audio/wav">
-    </audio>
-
+    <audio id="fish-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-game-alert-316.mp3"></audio>
+    <audio id="bottle-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-glass-break-with-huge-reverb-390.mp3"></audio>
     <script>
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
@@ -278,11 +273,11 @@
             vidas: 3,
             puntuacion: 0,
             obstaculos: {
-                spawnRate: 0.005,
-                speed: 1.2,
-                max: 2,
-                width: 60,
-                height: 100
+                spawnRate: 0.01,  // Aumentar frecuencia
+                speed: 1.5,
+                max: 3,
+                width: 40,        // Reducir tamaño
+                height: 60       // Reducir tamaño
             }
         };
 
@@ -418,7 +413,8 @@
             const dir = Math.random() > 0.5 ? 1 : -1;
             return {
                 x: dir === 1 ? -config.obstaculos.width : canvas.width,
-                y: aguaY + Math.random() * (aguaHeight - config.obstaculos.height),
+                // Ajustar posición vertical aleatoria
+                y: aguaY + 20 + Math.random() * (aguaHeight - 100),
                 width: type === 'pez' ? config.pez.width : config.obstaculos.width,
                 height: type === 'pez' ? config.pez.height : config.obstaculos.height,
                 direccion: dir,
@@ -427,6 +423,12 @@
                     config.obstaculos.speed + (Math.random() * 0.5),
                 type: type
             };
+        }
+function playSound(audioElement) {
+            audioElement.currentTime = 0;
+            audioElement.play().catch(error => {
+                console.log('La reproducción automática fue prevenida:', error);
+            });
         }
 
         function drawGame() {
@@ -492,7 +494,7 @@
                     anzueloY > pez.y && anzueloY < pez.y + pez.height) {
                     config.puntuacion += 10;
                     peces.splice(index, 1);
-                    fishSound.play();
+                    playSound(fishSound);  // Cambiado aquí
                     updateDisplay();
                 }
             });
@@ -507,10 +509,11 @@
                 if(distancia < (config.cana.anzueloSize + obstaculo.width/2)) {
                     config.vidas--;
                     obstaculos.splice(index, 1);
-                    bottleSound.play();
+                    playSound(bottleSound);  // Cambiado aquí
                     updateDisplay();
                     if(config.vidas <= 0) gameOver();
                 }
+     
             });
         }
 
