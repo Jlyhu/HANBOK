@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tigre Pesquero</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
             box-sizing: border-box;
@@ -15,7 +14,7 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            color: white;
+            color: #333;
             overflow: hidden;
             touch-action: manipulation;
             min-height: 100vh;
@@ -23,7 +22,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(to bottom, #1a0033, #2a004d);
+            background: #ffffff;
         }
 
         #game-container {
@@ -31,16 +30,31 @@
             width: 100%;
             max-width: 600px;
             margin: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        #header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #logo {
+            width: 200px;
+            height: auto;
+            margin: 0 auto 15px;
         }
 
         #canvas-wrapper {
             position: relative;
             width: 100%;
             padding-bottom: 75%;
-            border-radius: 15px;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 0 30px rgba(156, 39, 176, 0.4);
-            background: linear-gradient(to bottom, #87CEEB, #1E90FF);
+            background: #e9ecef;
+            border: 2px solid #dee2e6;
         }
 
         #game-canvas {
@@ -62,16 +76,16 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            border: 2px solid #e0b0ff;
-            background: rgba(156, 39, 176, 0.3);
-            color: white;
+            border: 2px solid #4dabf7;
+            background: #e7f5ff;
+            color: #228be6;
             font-size: 24px;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .control-btn:active {
-            background: rgba(156, 39, 176, 0.7);
+            background: #d0ebff;
             transform: scale(0.95);
         }
 
@@ -81,7 +95,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(26, 0, 51, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             display: none;
             flex-direction: column;
             align-items: center;
@@ -91,25 +105,33 @@
         }
 
         #start-btn {
-            padding: 15px 30px;
-            font-size: 18px;
-            background: linear-gradient(135deg, #9c27b0, #673ab7);
+            padding: 12px 30px;
+            font-size: 16px;
+            background: #4dabf7;
             border: none;
-            border-radius: 30px;
+            border-radius: 25px;
             color: white;
             cursor: pointer;
             margin: 20px;
-            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(77, 171, 247, 0.3);
+        }
+
+        #start-btn:hover {
+            background: #228be6;
         }
 
         #score-display {
             position: absolute;
             top: 15px;
             left: 15px;
-            font-size: 24px;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-size: 20px;
+            color: #495057;
             z-index: 2;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         #lives-display {
@@ -119,19 +141,40 @@
             display: flex;
             gap: 10px;
             z-index: 2;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         .life {
-            width: 30px;
-            height: 30px;
+            width: 25px;
+            height: 25px;
             background: url('corazon.png') center/contain no-repeat;
+            filter: hue-rotate(180deg);
+        }
+
+        #game-over h2 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        #restart-btn {
+            background: #4dabf7;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 20px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <h1>Tigre Pesquero</h1>
-    
     <div id="game-container">
+        <div id="header">
+            <img id="logo" src="logo.png" alt="Logo del juego">
+        </div>
+        
         <div id="canvas-wrapper">
             <canvas id="game-canvas"></canvas>
             
@@ -143,9 +186,9 @@
             </div>
             
             <div id="game-over">
-                <h2>¡Game Over!</h2>
+                <h2>¡Juego Terminado!</h2>
                 <p>Puntuación final: <span id="final-score">0</span></p>
-                <button id="restart-btn" class="control-btn">↻</button>
+                <button id="restart-btn">Reiniciar</button>
             </div>
         </div>
     </div>
