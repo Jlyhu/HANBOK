@@ -28,27 +28,35 @@
 
         .header-container {
             display: flex;
-            gap: 30px;
-            margin-bottom: 20px;
-            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 800px;
         }
 
         .playlist-container {
             display: flex;
             flex-direction: column;
             align-items: center;
+            flex: 1;
+            min-width: 150px;
         }
 
         #logo {
-            width: 200px;
+            width: 150px;
             height: auto;
+            max-width: 100%;
         }
 
         #playlist {
-            width: 150px;
+            width: 120px;
             height: auto;
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 100%;
         }
 
         .music-message {
@@ -56,7 +64,8 @@
             font-size: 12px;
             color: #666;
             margin-bottom: 8px;
-            width: 180px;
+            width: 100%;
+            max-width: 180px;
         }
 
         #game-container {
@@ -64,10 +73,13 @@
             width: 100%;
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 15px;
             background: #f8f9fa;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         #start-screen {
@@ -88,7 +100,8 @@
         #canvas-wrapper {
             position: relative;
             width: 100%;
-            padding-bottom: 100%;
+            flex: 1;
+            min-height: 300px;
             border-radius: 8px;
             overflow: hidden;
             background: #e9ecef;
@@ -104,59 +117,64 @@
         }
 
         #controls {
-            margin-top: 20px;
+            margin-top: 15px;
             display: flex;
             gap: 15px;
             justify-content: center;
+            width: 100%;
         }
 
         .control-btn {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             border: 2px solid #4dabf7;
             background: #e7f5ff;
             color: #228be6;
-            font-size: 28px;
+            font-size: 24px;
             cursor: pointer;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
 
         #music-control {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 15px;
+            right: 15px;
             z-index: 5;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
         }
 
         #score-display {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            font-size: 20px;
+            top: 10px;
+            left: 10px;
+            font-size: 16px;
             color: #495057;
             z-index: 2;
             background: rgba(255, 255, 255, 0.9);
-            padding: 8px 15px;
+            padding: 6px 12px;
             border-radius: 20px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         #lives-display {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 10px;
+            right: 10px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             z-index: 2;
             background: rgba(255, 255, 255, 0.9);
-            padding: 8px 15px;
+            padding: 6px 12px;
             border-radius: 20px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         .life {
-            font-size: 24px;
+            font-size: 20px;
             color: #ff5252;
         }
 
@@ -176,14 +194,14 @@
         }
 
         #start-btn {
-            padding: 15px 35px;
-            font-size: 18px;
+            padding: 12px 30px;
+            font-size: 16px;
             background: #4dabf7;
             border: none;
             border-radius: 25px;
             color: white;
             cursor: pointer;
-            margin: 20px;
+            margin: 15px;
             transition: all 0.3s;
             box-shadow: 0 2px 8px rgba(77, 171, 247, 0.3);
         }
@@ -192,25 +210,90 @@
             background: #4dabf7;
             color: white;
             border: none;
-            padding: 10px 25px;
+            padding: 8px 20px;
             border-radius: 20px;
             cursor: pointer;
+            font-size: 14px;
         }
 
-        @media (max-width: 600px) {
+        /* Orientación horizontal (landscape) */
+        @media (orientation: landscape) {
+            body {
+                flex-direction: row;
+                align-items: flex-start;
+                padding: 10px;
+            }
+            
             .header-container {
                 flex-direction: column;
-                align-items: center;
+                width: auto;
+                margin-right: 15px;
+                margin-bottom: 0;
+                flex-shrink: 0;
             }
             
             #game-container {
-                padding: 15px;
+                max-width: none;
+                margin: 0;
+                flex: 1;
+            }
+            
+            #canvas-wrapper {
+                min-height: 200px;
+            }
+            
+            #logo {
+                width: 120px;
+            }
+            
+            #playlist {
+                width: 100px;
+            }
+        }
+
+        /* Pantallas pequeñas */
+        @media (max-width: 600px) {
+            .header-container {
+                gap: 15px;
+            }
+            
+            #game-container {
+                padding: 10px;
             }
             
             .control-btn {
-                width: 60px;
-                height: 60px;
-                font-size: 24px;
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
+            #score-display, #lives-display {
+                font-size: 14px;
+                padding: 4px 8px;
+            }
+            
+            .life {
+                font-size: 18px;
+            }
+        }
+
+        /* Pantallas muy pequeñas */
+        @media (max-width: 400px) {
+            #logo {
+                width: 120px;
+            }
+            
+            #playlist {
+                width: 90px;
+            }
+            
+            .music-message {
+                font-size: 11px;
+            }
+            
+            #start-btn {
+                padding: 10px 25px;
+                font-size: 14px;
             }
         }
     </style>
@@ -273,8 +356,9 @@
         let gameRunning = false;
         let animationFrameId;
 
-        const config = {
-            tigre: { width: 120, height: 168, x: 0, y: 0 },
+        // Configuración escalable
+        const baseConfig = {
+            tigre: { width: 120, height: 168 },
             pez: { width: 80, height: 60, speed: 1.5 },
             cana: { velocidad: 8, longitudMaxima: 0, activa: false, longitud: 0, anzueloSize: 20 },
             vidas: 3,
@@ -282,8 +366,10 @@
             obstaculos: { spawnRate: 0.008, speed: 1.8, max: 3, width: 40, height: 50 }
         };
 
+        let config = JSON.parse(JSON.stringify(baseConfig));
         let aguaY = 0, aguaHeight = 0;
         let peces = [], obstaculos = [];
+        let scaleFactor = 1;
 
         // Elementos de audio
         const bgMusic = document.getElementById('bg-music');
@@ -300,6 +386,7 @@
         function initGame() {
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
+            window.addEventListener('orientationchange', resizeCanvas);
             document.getElementById('start-btn').addEventListener('click', startGame);
             document.getElementById('restart-btn').addEventListener('click', resetGame);
             document.getElementById('action-btn').addEventListener('click', lanzarCana);
@@ -311,11 +398,29 @@
             const wrapper = document.getElementById('canvas-wrapper');
             canvas.width = wrapper.offsetWidth;
             canvas.height = wrapper.offsetHeight;
+            
+            // Calcular factor de escala basado en el ancho del canvas
+            scaleFactor = Math.min(1, canvas.width / 400);
+            
+            // Aplicar escala a la configuración
+            config.tigre.width = baseConfig.tigre.width * scaleFactor;
+            config.tigre.height = baseConfig.tigre.height * scaleFactor;
+            config.pez.width = baseConfig.pez.width * scaleFactor;
+            config.pez.height = baseConfig.pez.height * scaleFactor;
+            config.obstaculos.width = baseConfig.obstaculos.width * scaleFactor;
+            config.obstaculos.height = baseConfig.obstaculos.height * scaleFactor;
+            config.cana.anzueloSize = baseConfig.cana.anzueloSize * scaleFactor;
+            
             config.tigre.x = canvas.width/2 - config.tigre.width/2;
-            config.tigre.y = 20;
+            config.tigre.y = 10 * scaleFactor;
             aguaY = config.tigre.y + config.tigre.height;
             aguaHeight = canvas.height - aguaY;
-            config.cana.longitudMaxima = aguaHeight - 20;
+            config.cana.longitudMaxima = aguaHeight - (20 * scaleFactor);
+            
+            // Redibujar si el juego está en curso
+            if (gameRunning) {
+                drawGame();
+            }
         }
 
         function startGame() {
@@ -340,7 +445,7 @@
 
         function updateGame() {
             if (config.cana.activa) {
-                config.cana.longitud += config.cana.velocidad;
+                config.cana.longitud += config.cana.velocidad * scaleFactor;
                 if (config.cana.longitud >= config.cana.longitudMaxima) {
                     config.cana.activa = false;
                     config.cana.longitud = 0;
@@ -375,7 +480,7 @@
 
         function moveEntities(entities) {
             entities.forEach(entity => {
-                entity.x += entity.direccion * entity.velocidad;
+                entity.x += entity.direccion * entity.velocidad * scaleFactor;
                 if (entity.x < -entity.width) entity.x = canvas.width;
                 if (entity.x > canvas.width) entity.x = -entity.width;
             });
@@ -397,7 +502,7 @@
             const dir = Math.random() > 0.5 ? 1 : -1;
             return {
                 x: dir === 1 ? -config.obstaculos.width : canvas.width,
-                y: aguaY + 30 + Math.random() * (aguaHeight - 80),
+                y: aguaY + (30 * scaleFactor) + Math.random() * (aguaHeight - (80 * scaleFactor)),
                 width: type === 'pez' ? config.pez.width : config.obstaculos.width,
                 height: type === 'pez' ? config.pez.height : config.obstaculos.height,
                 direccion: dir,
@@ -417,16 +522,17 @@
             ctx.drawImage(tigreImg, config.tigre.x, config.tigre.y, config.tigre.width, config.tigre.height);
 
             if (config.cana.activa) {
-                const startY = config.tigre.y + config.tigre.height - 10;
+                const startY = config.tigre.y + config.tigre.height - (10 * scaleFactor);
                 ctx.beginPath();
                 ctx.moveTo(config.tigre.x + config.tigre.width/2, startY);
                 ctx.lineTo(config.tigre.x + config.tigre.width/2, startY + config.cana.longitud);
                 ctx.strokeStyle = '#654321';
-                ctx.lineWidth = 4;
+                ctx.lineWidth = 4 * scaleFactor;
                 ctx.stroke();
 
                 ctx.beginPath();
-                ctx.arc(config.tigre.x + config.tigre.width/2, startY + config.cana.longitud, config.cana.anzueloSize, 0, Math.PI * 2);
+                ctx.arc(config.tigre.x + config.tigre.width/2, startY + config.cana.longitud, 
+                       config.cana.anzueloSize, 0, Math.PI * 2);
                 ctx.fillStyle = 'gold';
                 ctx.fill();
             }
@@ -451,7 +557,7 @@
 
         function checkCollisions() {
             const anzueloX = config.tigre.x + config.tigre.width/2;
-            const anzueloY = config.tigre.y + config.tigre.height - 10 + config.cana.longitud;
+            const anzueloY = config.tigre.y + config.tigre.height - (10 * scaleFactor) + config.cana.longitud;
 
             peces.forEach((pez, index) => {
                 if (anzueloX > pez.x && anzueloX < pez.x + pez.width &&
@@ -465,10 +571,9 @@
 
             obstaculos.forEach((obstaculo, index) => {
                 const distancia = Math.sqrt(
-    Math.pow(anzueloX - (obstaculo.x + obstaculo.width/2), 2) +
-    Math.pow(anzueloY - (obstaculo.y + obstaculo.height/2), 2)
-);
-
+                    Math.pow(anzueloX - (obstaculo.x + obstaculo.width/2), 2) +
+                    Math.pow(anzueloY - (obstaculo.y + obstaculo.height/2), 2)
+                );
                 
                 if(distancia < (config.cana.anzueloSize + obstaculo.width/2)) {
                     config.vidas--;
@@ -494,6 +599,7 @@
 
         function gameOver() {
             gameRunning = false;
+            cancelAnimationFrame(animationFrameId);
             document.getElementById('game-over').style.display = 'flex';
             document.getElementById('final-score').textContent = config.puntuacion;
         }
@@ -503,7 +609,7 @@
             startGame();
         }
 
-       window.addEventListener('DOMContentLoaded', initGame);
+        window.addEventListener('DOMContentLoaded', initGame);
     </script>
 </body>
 </html>
