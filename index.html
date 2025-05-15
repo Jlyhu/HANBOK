@@ -6,6 +6,7 @@
     <title>Tigre Pesquero</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
         * {
             box-sizing: border-box;
             margin: 0;
@@ -24,28 +25,35 @@
             padding: 20px;
             overflow-x: hidden;
         }
-    .header {
+
+        .header-container {
             display: flex;
             align-items: center;
             gap: 20px;
             margin-bottom: 20px;
         }
 
+        #logo {
+            width: 200px;
+            height: auto;
+        }
+
+        #playlist {
+            width: 150px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
 
         #game-container {
             position: relative;
             width: 100%;
             max-width: 800px;
-            margin: 20px auto;
+            margin: 0 auto;
             padding: 20px;
             background: #f8f9fa;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        #logo {
-            width: 200px;
-            height: auto;
         }
 
         #start-screen {
@@ -107,7 +115,7 @@
             right: 20px;
             z-index: 5;
         }
-    
+
         #score-display {
             position: absolute;
             top: 15px;
@@ -176,31 +184,22 @@
             cursor: pointer;
         }
 
-         .music-message {
+        .music-message {
             text-align: center;
             margin: 15px 0;
             font-size: 14px;
             color: #666;
         }
-    
-        #playlist {
-            width: 150px;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
 
         @media (max-width: 600px) {
+            .header-container {
+                flex-direction: column;
+            }
+            
             #game-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
+                margin: 10px;
+                padding: 15px;
+            }
             
             .control-btn {
                 width: 60px;
@@ -211,7 +210,7 @@
     </style>
 </head>
 <body>
-    <div class="header">
+    <div class="header-container">
         <img id="logo" src="logo.png" alt="Logo del juego">
         <img id="playlist" src="playlist.jpg" alt="Playlist">
     </div>
@@ -237,7 +236,7 @@
         </div>
     </div>
     
-     <div id="controls">
+    <div id="controls">
         <button class="control-btn" id="action-btn">⚓</button>
     </div>
 
@@ -248,7 +247,6 @@
     <div class="music-message">
         Tu experiencia se complementa con música. Escanea en Spotify y déjate llevar
     </div>
-    <img id="playlist" src="playlist.jpg" alt="Playlist">
 
     <!-- Audio -->
     <audio id="bg-music" loop>
@@ -260,6 +258,7 @@
     <audio id="botellaChoque">
         <source src="botellaChoque.mp3" type="audio/mpeg">
     </audio>
+
     <script>
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
@@ -288,12 +287,12 @@
             },
             vidas: 3,
             puntuacion: 0,
-           obstaculos: {
+            obstaculos: {
                 spawnRate: 0.008,
                 speed: 1.8,
                 max: 3,
-                width: 40,  // Tamaño reducido
-                height: 50  // Tamaño reducido
+                width: 40,
+                height: 50
             }
         };
 
@@ -304,7 +303,7 @@
 
         // Elementos de audio
         const bgMusic = document.getElementById('bg-music');
-       const fishSound = document.getElementById('pesca');
+        const fishSound = document.getElementById('pesca');
         const bottleSound = document.getElementById('botellaChoque');
         const musicButton = document.getElementById('music-control');
         let isMusicOn = false;
@@ -387,7 +386,7 @@
 
         function handleKeyPress(e) {
             if (e.key === ' ') {
-                e.preventDefault(); // Previene el scroll
+                e.preventDefault();
                 lanzarCana();
             }
         }
@@ -429,7 +428,7 @@
             const dir = Math.random() > 0.5 ? 1 : -1;
             return {
                 x: dir === 1 ? -config.obstaculos.width : canvas.width,
-                y: aguaY + 30 + Math.random() * (aguaHeight - 80), // Ajuste posición vertical
+                y: aguaY + 30 + Math.random() * (aguaHeight - 80),
                 width: type === 'pez' ? config.pez.width : config.obstaculos.width,
                 height: type === 'pez' ? config.pez.height : config.obstaculos.height,
                 direccion: dir,
@@ -438,15 +437,6 @@
                     config.obstaculos.speed + (Math.random() * 0.5),
                 type: type
             };
-        }
-        
-function playSound(sound) {
-            sound.currentTime = 0;
-            if (isMusicOn) {
-                sound.play().catch(error => {
-                    console.log('Error al reproducir sonido:', error);
-                });
-            }
         }
 
         function drawGame() {
@@ -534,13 +524,22 @@ function playSound(sound) {
             });
         }
 
+        function playSound(sound) {
+            sound.currentTime = 0;
+            if (isMusicOn) {
+                sound.play().catch(error => {
+                    console.log('Error al reproducir sonido:', error);
+                });
+            }
+        }
+
         function updateDisplay() {
             document.getElementById('score-display').textContent = `Puntos: ${config.puntuacion}`;
             document.querySelectorAll('.life').forEach((life, index) => {
                 life.style.opacity = index < config.vidas ? 1 : 0.3;
             });
         }
-
+        
         function gameOver() {
             gameRunning = false;
             document.getElementById('game-over').style.display = 'flex';
