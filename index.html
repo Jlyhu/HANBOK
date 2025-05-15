@@ -12,7 +12,7 @@
             padding: 0;
         }
 
-        body {
+       body {
             font-family: 'Poppins', sans-serif;
             color: #333;
             overflow: hidden;
@@ -25,21 +25,21 @@
             background: #ffffff;
         }
 
-        #game-container {
+         #game-container {
             position: relative;
             width: 100%;
-            max-width: 600px;
+            max-width: 800px; /* Contenedor más grande */
             margin: 20px;
-            padding: 15px;
+            padding: 20px;
             background: #f8f9fa;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
 
         #logo {
-            width: 200px;
+            width: 250px; /* Logo más grande */
             height: auto;
-            margin: 0 auto 15px;
+            margin: 0 auto 20px;
             display: block;
         }
 
@@ -61,7 +61,7 @@
         #canvas-wrapper {
             position: relative;
             width: 100%;
-            padding-bottom: 75%;
+            padding-bottom: 100%; /* Relación 1:1 */
             border-radius: 8px;
             overflow: hidden;
             background: #e9ecef;
@@ -76,21 +76,22 @@
             height: 100%;
         }
 
-        #controls {
+         #controls {
             margin-top: 20px;
             display: flex;
             gap: 15px;
             justify-content: center;
+            position: relative;
         }
 
         .control-btn {
-            width: 60px;
-            height: 60px;
+            width: 70px; /* Botones más grandes */
+            height: 70px;
             border-radius: 50%;
             border: 2px solid #4dabf7;
             background: #e7f5ff;
             color: #228be6;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -172,6 +173,13 @@
             border-radius: 20px;
             cursor: pointer;
         }
+
+         #music-control {
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            z-index: 5;
+        }
     </style>
 </head>
 <body>
@@ -197,10 +205,34 @@
             </div>
         </div>
     </div>
+
+     <button id="music-control" class="control-btn">
+        <i class="fas fa-volume-up"></i>
+    </button>
+
+    <div id="game-container">
+        <img id="logo" src="logo.png" alt="Logo del juego">
+        
+        <div id="start-screen">
+            <button id="start-btn">Comenzar Juego</button>
+        </div>
+        
+        <div id="canvas-wrapper">
+            <canvas id="game-canvas"></canvas>
+            <!-- Elementos de UI... -->
+        </div>
+    </div>
     
     <div id="controls">
         <button class="control-btn" id="action-btn">⚓</button>
     </div>
+
+     <!-- Audio -->
+    <audio id="bg-music" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-k-pop-dance-165.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="fish-sound" src="https://assets.mixkit.co/active_preview/sounds/2096.mp3"></audio>
+    <audio id="bottle-sound" src="https://assets.mixkit.co/active_preview/sounds/2223.mp3"></audio>
 
     <script>
         const canvas = document.getElementById('game-canvas');
@@ -208,16 +240,35 @@
         let gameRunning = false;
         let animationFrameId;
 
+         // Configuración de audio
+        const bgMusic = document.getElementById('bg-music');
+        const fishSound = document.getElementById('fish-sound');
+        const bottleSound = document.getElementById('bottle-sound');
+        const musicButton = document.getElementById('music-control');
+        let isMusicOn = false;
+
+        // Control de música
+        musicButton.addEventListener('click', () => {
+            isMusicOn = !isMusicOn;
+            if(isMusicOn) {
+                bgMusic.play();
+                musicButton.innerHTML = '<i class="fas fa-volume-up"></i>';
+            } else {
+                bgMusic.pause();
+                musicButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            }
+        });
+
 const config = {
             tigre: {
-                width: 150,  // Tamaño carta ajustado
-                height: 210, // Relación 1:1.4 (carta estándar)
+                width: 120,  // Ajustado
+                height: 168,
                 x: 0,
                 y: 0
             },
             pez: {
-                width: 105,  // Tamaño carta ajustado
-                height: 150, // Relación 1:1.4
+                width: 84,
+                height: 120,
                 speed: 1.5
             },
             cana: {
@@ -433,6 +484,17 @@ const config = {
         }
 
         function checkCollisions() {
+            // Colisión con pez
+            if (/* detección de pez */) {
+                fishSound.currentTime = 0;
+                fishSound.play();
+            }
+
+            // Colisión con botella
+            if (/* detección de botella */) {
+                bottleSound.currentTime = 0;
+                bottleSound.play();
+            }
             const anzueloX = config.tigre.x + config.tigre.width/2;
             const anzueloY = config.tigre.y + config.tigre.height - 10 + config.cana.longitud;
 
