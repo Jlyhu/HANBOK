@@ -26,12 +26,17 @@
             overflow-x: hidden;
         }
 
-         .header-container {
+        .header-container {
             display: flex;
-            align-items: flex-start; /* Alineación superior */
-            gap: 20px;
+            gap: 30px;
             margin-bottom: 20px;
-            position: relative;
+            align-items: flex-start;
+        }
+
+        .playlist-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         #logo {
@@ -40,11 +45,18 @@
         }
 
         #playlist {
-            margin-top: 30px; /* Espacio para el mensaje */
             width: 150px;
             height: auto;
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .music-message {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            width: 180px;
         }
 
         #game-container {
@@ -96,7 +108,6 @@
             display: flex;
             gap: 15px;
             justify-content: center;
-            position: relative;
         }
 
         .control-btn {
@@ -186,20 +197,13 @@
             cursor: pointer;
         }
 
-        .music-message {
-            text-align: center;
-            margin: 15px 0;
-            font-size: 14px;
-            color: #666;
-        }
-
         @media (max-width: 600px) {
             .header-container {
                 flex-direction: column;
+                align-items: center;
             }
             
             #game-container {
-                margin: 10px;
                 padding: 15px;
             }
             
@@ -214,9 +218,10 @@
 <body>
     <div class="header-container">
         <img id="logo" src="logo.png" alt="Logo del juego">
-        <div>
+        <div class="playlist-container">
             <div class="music-message">
-                Tu experiencia se complementa con música. Escanea en Spotify y déjate llevar
+                Tu experiencia se complementa con música.<br>
+                Escanea en Spotify y déjate llevar
             </div>
             <img id="playlist" src="playlist.jpg" alt="Playlist">
         </div>
@@ -251,20 +256,16 @@
         <i class="fas fa-volume-up"></i>
     </button>
 
-    <div class="music-message">
-        Tu experiencia se complementa con música. Escanea en Spotify y déjate llevar
-    </div>
-
     <!-- Audio -->
-   <audio id="bg-music" loop>
-    <source src="musicaTigre.mp3" type="audio/mpeg">
-</audio>
-<audio id="pesca">
-    <source src="pesca.mp3" type="audio/mpeg">
-</audio>
-<audio id="botellaChoque">
-    <source src="botellaChoque.mp3" type="audio/mpeg">
-</audio>
+    <audio id="bg-music" loop>
+        <source src="musicaTigre.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="pesca">
+        <source src="pesca.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="botellaChoque">
+        <source src="botellaChoque.mp3" type="audio/mpeg">
+    </audio>
 
     <script>
         const canvas = document.getElementById('game-canvas');
@@ -272,61 +273,33 @@
         let gameRunning = false;
         let animationFrameId;
 
-        // Configuración del juego
         const config = {
-            tigre: {
-                width: 120,
-                height: 168,
-                x: 0,
-                y: 0
-            },
-            pez: {
-                width: 80,
-                height: 60,
-                speed: 1.5
-            },
-            cana: {
-                velocidad: 8,
-                longitudMaxima: 0,
-                activa: false,
-                longitud: 0,
-                anzueloSize: 20
-            },
+            tigre: { width: 120, height: 168, x: 0, y: 0 },
+            pez: { width: 80, height: 60, speed: 1.5 },
+            cana: { velocidad: 8, longitudMaxima: 0, activa: false, longitud: 0, anzueloSize: 20 },
             vidas: 3,
             puntuacion: 0,
-            obstaculos: {
-                spawnRate: 0.008,
-                speed: 1.8,
-                max: 3,
-                width: 40,
-                height: 50
-            }
+            obstaculos: { spawnRate: 0.008, speed: 1.8, max: 3, width: 40, height: 50 }
         };
 
-        // Variables del juego
         let aguaY = 0, aguaHeight = 0;
-        let peces = [];
-        let obstaculos = [];
+        let peces = [], obstaculos = [];
 
         // Elementos de audio
         const bgMusic = document.getElementById('bg-music');
-    const fishSound = document.getElementById('pesca');
-    const bottleSound = document.getElementById('botellaChoque');
-    let isMusicOn = false;
+        const fishSound = document.getElementById('pesca');
+        const bottleSound = document.getElementById('botellaChoque');
+        const musicButton = document.getElementById('music-control');
+        let isMusicOn = false;
 
         // Imágenes
-        const tigreImg = new Image();
-        tigreImg.src = 'tigre.png';
-        const pezImg = new Image();
-        pezImg.src = 'pez.png';
-        const botellaImg = new Image();
-        botellaImg.src = 'botella.png';
+        const tigreImg = new Image(); tigreImg.src = 'tigre.png';
+        const pezImg = new Image(); pezImg.src = 'pez.png';
+        const botellaImg = new Image(); botellaImg.src = 'botella.png';
 
         function initGame() {
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
-
-            // Event listeners
             document.getElementById('start-btn').addEventListener('click', startGame);
             document.getElementById('restart-btn').addEventListener('click', resetGame);
             document.getElementById('action-btn').addEventListener('click', lanzarCana);
@@ -338,7 +311,6 @@
             const wrapper = document.getElementById('canvas-wrapper');
             canvas.width = wrapper.offsetWidth;
             canvas.height = wrapper.offsetHeight;
-
             config.tigre.x = canvas.width/2 - config.tigre.width/2;
             config.tigre.y = 20;
             aguaY = config.tigre.y + config.tigre.height;
@@ -375,10 +347,8 @@
                 }
                 checkCollisions();
             }
-
             moveEntities(peces);
             moveEntities(obstaculos);
-
             generateFish();
             generateObstacles();
         }
@@ -398,15 +368,10 @@
         }
 
         function toggleMusic() {
-        isMusicOn = !isMusicOn;
-        if(isMusicOn) {
-            bgMusic.play();
-            musicButton.innerHTML = '<i class="fas fa-volume-up"></i>';
-        } else {
-            bgMusic.pause();
-            musicButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            isMusicOn = !isMusicOn;
+            isMusicOn ? bgMusic.play() : bgMusic.pause();
+            musicButton.innerHTML = isMusicOn ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
         }
-    }
 
         function moveEntities(entities) {
             entities.forEach(entity => {
@@ -417,9 +382,7 @@
         }
 
         function generateFish() {
-            if (peces.length < 3 && Math.random() < 0.02) {
-                peces.push(createEntity('pez'));
-            }
+            if (peces.length < 3 && Math.random() < 0.02) peces.push(createEntity('pez'));
         }
 
         function generateObstacles() {
@@ -438,28 +401,21 @@
                 width: type === 'pez' ? config.pez.width : config.obstaculos.width,
                 height: type === 'pez' ? config.pez.height : config.obstaculos.height,
                 direccion: dir,
-                velocidad: type === 'pez' ? 
-                    config.pez.speed : 
-                    config.obstaculos.speed + (Math.random() * 0.5),
+                velocidad: type === 'pez' ? config.pez.speed : config.obstaculos.speed + (Math.random() * 0.5),
                 type: type
             };
         }
 
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Fondo de agua
             const grad = ctx.createLinearGradient(0, aguaY, 0, canvas.height);
             grad.addColorStop(0, "#87CEEB");
             grad.addColorStop(1, "#1E90FF");
             ctx.fillStyle = grad;
             ctx.fillRect(0, aguaY, canvas.width, aguaHeight);
 
-            // Dibujar tigre
-            ctx.drawImage(tigreImg, config.tigre.x, config.tigre.y, 
-                         config.tigre.width, config.tigre.height);
+            ctx.drawImage(tigreImg, config.tigre.x, config.tigre.y, config.tigre.width, config.tigre.height);
 
-            // Dibujar caña
             if (config.cana.activa) {
                 const startY = config.tigre.y + config.tigre.height - 10;
                 ctx.beginPath();
@@ -470,14 +426,11 @@
                 ctx.stroke();
 
                 ctx.beginPath();
-                ctx.arc(config.tigre.x + config.tigre.width/2, 
-                       startY + config.cana.longitud, 
-                       config.cana.anzueloSize, 0, Math.PI * 2);
+                ctx.arc(config.tigre.x + config.tigre.width/2, startY + config.cana.longitud, config.cana.anzueloSize, 0, Math.PI * 2);
                 ctx.fillStyle = 'gold';
                 ctx.fill();
             }
 
-            // Dibujar elementos
             drawEntities(peces, pezImg);
             drawEntities(obstaculos, botellaImg);
         }
@@ -488,11 +441,9 @@
                 if (entity.direccion === -1) {
                     ctx.translate(entity.x + entity.width/2, entity.y + entity.height/2);
                     ctx.scale(-1, 1);
-                    ctx.drawImage(img, -entity.width/2, -entity.height/2, 
-                                entity.width, entity.height);
+                    ctx.drawImage(img, -entity.width/2, -entity.height/2, entity.width, entity.height);
                 } else {
-                    ctx.drawImage(img, entity.x, entity.y, 
-                                entity.width, entity.height);
+                    ctx.drawImage(img, entity.x, entity.y, entity.width, entity.height);
                 }
                 ctx.restore();
             });
@@ -502,7 +453,6 @@
             const anzueloX = config.tigre.x + config.tigre.width/2;
             const anzueloY = config.tigre.y + config.tigre.height - 10 + config.cana.longitud;
 
-            // Colisión con peces
             peces.forEach((pez, index) => {
                 if (anzueloX > pez.x && anzueloX < pez.x + pez.width &&
                     anzueloY > pez.y && anzueloY < pez.y + pez.height) {
@@ -513,12 +463,10 @@
                 }
             });
 
-            // Colisión con obstáculos
             obstaculos.forEach((obstaculo, index) => {
                 const distancia = Math.sqrt(
                     Math.pow(anzueloX - (obstaculo.x + obstaculo.width/2), 2) +
-                    Math.pow(anzueloY - (obstaculo.y + obstaculo.height/2), 2)
-                );
+                    Math.pow(anzueloY - (obstaculo.y + obstaculo.height/2), 2);
                 
                 if(distancia < (config.cana.anzueloSize + obstaculo.width/2)) {
                     config.vidas--;
@@ -531,11 +479,8 @@
         }
 
         function playSound(sound) {
-        sound.currentTime = 0;
-        sound.play().catch(error => {
-            console.log('Error al reproducir sonido:', error);
-        });
-    }
+            sound.currentTime = 0;
+            sound.play().catch(error => console.log('Error de sonido:', error));
         }
 
         function updateDisplay() {
@@ -544,19 +489,18 @@
                 life.style.opacity = index < config.vidas ? 1 : 0.3;
             });
         }
-        
+
         function gameOver() {
             gameRunning = false;
             document.getElementById('game-over').style.display = 'flex';
             document.getElementById('final-score').textContent = config.puntuacion;
         }
 
-                function resetGame() {
+        function resetGame() {
             document.getElementById('game-over').style.display = 'none';
             startGame();
         }
 
-        // Iniciar el juego
         initGame();
     </script>
 </body>
