@@ -25,7 +25,7 @@
             background: #ffffff;
         }
 
-#game-container {
+        #game-container {
             position: relative;
             width: 100%;
             max-width: 600px;
@@ -35,15 +35,33 @@
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
+
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            text-align: center;
+        }
+
         #header {
             text-align: center;
             margin-bottom: 20px;
         }
+
         #logo {
             width: 200px;
             height: auto;
             margin: 0 auto 15px;
         }
+
         #canvas-wrapper {
             position: relative;
             width: 100%;
@@ -53,6 +71,7 @@
             background: #e9ecef;
             border: 2px solid #dee2e6;
         }
+
         #game-canvas {
             position: absolute;
             top: 0;
@@ -113,10 +132,6 @@
             box-shadow: 0 2px 8px rgba(77, 171, 247, 0.3);
         }
 
-        #start-btn:hover {
-            background: #228be6;
-        }
-
         #score-display {
             position: absolute;
             top: 15px;
@@ -144,10 +159,8 @@
         }
 
         .life {
-            width: 25px;
-            height: 25px;
-            background: url('corazon.png') center/contain no-repeat;
-            filter: hue-rotate(180deg);
+            font-size: 24px;
+            color: #ff5252;
         }
 
         #game-over h2 {
@@ -167,16 +180,20 @@
 </head>
 <body>
     <div id="game-container">
-        <div id="header">
-            <img id="logo" src="logo.png" alt="Logo del juego">
+        <div id="start-screen">
+            <div id="header">
+                <img id="logo" src="logo.png" alt="Logo del juego">
+            </div>
+            <button id="start-btn">Comenzar Juego</button>
         </div>
+        
         <div id="canvas-wrapper">
             <canvas id="game-canvas"></canvas>
             <div id="score-display">Puntos: 0</div>
             <div id="lives-display">
-                <div class="life"></div>
-                <div class="life"></div>
-                <div class="life"></div>
+                <div class="life">❤️</div>
+                <div class="life">❤️</div>
+                <div class="life">❤️</div>
             </div>
             <div id="game-over">
                 <h2>¡Juego Terminado!</h2>
@@ -185,11 +202,8 @@
             </div>
         </div>
     </div>
-    <button id="start-btn">Comenzar Juego</button>
     <div id="controls">
-        <button class="control-btn" id="left-btn">←</button>
         <button class="control-btn" id="action-btn">⚓</button>
-        <button class="control-btn" id="right-btn">→</button>
     </div>
     <script>
         const canvas = document.getElementById('game-canvas');
@@ -200,31 +214,33 @@
         // Configuración del juego
         const config = {
             tigre: {
-                width: 80,
-                height: 100,
-                speed: 8,
+                width: 100,
+                height: 80,
                 x: 0,
-                y: 0 // Se define dinámicamente
+                y: 0
             },
             pez: {
                 width: 60,
                 height: 40,
-                speed: 1.5 // Más lento
+                speed: 1.5
             },
             cana: {
                 velocidad: 8,
-                longitudMaxima: 220,
+                longitudMaxima: 0,
                 activa: false,
                 longitud: 0,
                 anzueloSize: 15
             },
             vidas: 3,
-            puntuacion: 0
+            puntuacion: 0,
+            obstaculos: {
+                spawnRate: 0.005,
+                speed: 1,
+                max: 2
+            }
         };
 
-        // Zona de agua (porcentaje desde arriba)
         let aguaY = 0, aguaHeight = 0;
-        // Estados del juego
         let peces = [];
         let obstaculos = [];
 
@@ -233,6 +249,8 @@
         tigreImg.src = 'tigre.png';
         const pezImg = new Image();
         pezImg.src = 'pez.png';
+        const piedraImg = new Image();
+        piedraImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAe0lEQVR4nO3WQQqAMAxE0fz/0yuXgoJNxk46FMF7VYFMXgKqSikfMQMTMAK9s9YHhAqYgRlYgK2iX8DmHNiBw1l7AqezdgGXs3YCl7N2BLez9gOPs/YBr7P2Bp+z9gS/s/YAg7N2B6OzdgWTs3YDs7N2AYuz9g8GpUzqBx/2AAAAAElFTkSuQmCC';
 
         function initGame() {
             resizeCanvas();
@@ -240,13 +258,21 @@
 
             document.getElementById('start-btn').addEventListener('click', startGame);
             document.getElementById('restart-btn').addEventListener('click', resetGame);
-
-            ['left-btn', 'right-btn', 'action-btn'].forEach(id => {
-                document.getElementById(id).addEventListener('touchstart', handleControl);
-                document.getElementById(id).addEventListener('mousedown', handleControl);
+            document.getElementById('action-btn').addEventListener('click', () => {
+                if (!config.cana.activa) {
+                    config.cana.activa = true;
+                    config.cana.longitud = 0;
+                }
             });
 
-            document.addEventListener('keydown', handleKeyPress);
+            document.addEventListener('keydown', e => {
+                if (e.key === ' ') {
+                    if (!config.cana.activa) {
+                        config.cana.activa = true;
+                        config.cana.longitud = 0;
+                    }
+                }
+            });
         }
 
         function resizeCanvas() {
@@ -254,17 +280,16 @@
             canvas.width = wrapper.offsetWidth;
             canvas.height = wrapper.offsetHeight;
 
-            // El tigre estará arriba, fuera del agua
-            config.tigre.y = 10; // 10 px del borde superior
             config.tigre.x = canvas.width/2 - config.tigre.width/2;
-
-            // Agua ocupa el 70% inferior del canvas
-            aguaY = config.tigre.y + config.tigre.height - 10;
+            config.tigre.y = 20;
+            aguaY = config.tigre.y + config.tigre.height;
             aguaHeight = canvas.height - aguaY;
+            config.cana.longitudMaxima = aguaHeight - 20;
         }
 
         function startGame() {
             if (!gameRunning) {
+                document.getElementById('start-screen').style.display = 'none';
                 gameRunning = true;
                 config.vidas = 3;
                 config.puntuacion = 0;
@@ -283,7 +308,7 @@
         }
 
         function updateGame() {
-            // Mover caña
+            // Movimiento de la caña
             if (config.cana.activa) {
                 config.cana.longitud += config.cana.velocidad;
                 if (config.cana.longitud >= config.cana.longitudMaxima) {
@@ -292,69 +317,101 @@
                 }
                 checkCollisions();
             }
-            // Mover peces
-            peces.forEach(pez => {
-                pez.x += pez.direccion * pez.velocidad;
-                // Si sale por un borde, reaparece por el otro
-                if (pez.direccion === 1 && pez.x > canvas.width) {
-                    pez.x = -pez.width;
-                    pez.y = aguaY + Math.random() * (aguaHeight - config.pez.height - 10);
-                } else if (pez.direccion === -1 && pez.x < -pez.width) {
-                    pez.x = canvas.width;
-                    pez.y = aguaY + Math.random() * (aguaHeight - config.pez.height - 10);
-                }
+
+            // Mover peces y obstáculos
+            moveEntities(peces);
+            moveEntities(obstaculos);
+
+            // Generar nuevos elementos
+            generateFish();
+            generateObstacles();
+        }
+
+        function moveEntities(entities) {
+            entities.forEach(entity => {
+                entity.x += entity.direccion * entity.velocidad;
+                if (entity.x < -entity.width) entity.x = canvas.width;
+                if (entity.x > canvas.width) entity.x = -entity.width;
             });
-            // Generar nuevos peces (máximo 3)
-            if (peces.length < 3 && Math.random() < 0.01) {
-                const dir = Math.random() > 0.5 ? 1 : -1;
-                peces.push({
-                    x: dir === 1 ? -config.pez.width : canvas.width,
-                    y: aguaY + Math.random() * (aguaHeight - config.pez.height - 10),
-                    width: config.pez.width,
-                    height: config.pez.height,
-                    direccion: dir,
-                    velocidad: config.pez.speed + Math.random() * 0.5
-                });
+        }
+
+        function generateFish() {
+            if (peces.length < 3 && Math.random() < 0.02) {
+                peces.push(createEntity('pez'));
             }
+        }
+
+        function generateObstacles() {
+            const difficulty = Math.min(1, config.puntuacion / 1000);
+            if (obstaculos.length < config.obstaculos.max + Math.floor(difficulty * 3) && 
+                Math.random() < config.obstaculos.spawnRate + (difficulty * 0.005)) {
+                obstaculos.push(createEntity('piedra'));
+            }
+        }
+
+        function createEntity(type) {
+            const dir = Math.random() > 0.5 ? 1 : -1;
+            return {
+                x: dir === 1 ? -60 : canvas.width,
+                y: aguaY + Math.random() * (aguaHeight - 60),
+                width: 60,
+                height: 60,
+                direccion: dir,
+                velocidad: type === 'pez' ? 
+                    config.pez.speed : 
+                    config.obstaculos.speed + (Math.random() * 0.5),
+                type: type
+            };
         }
 
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Dibujar agua (degradado)
+            // Dibujar agua
             const grad = ctx.createLinearGradient(0, aguaY, 0, canvas.height);
-            grad.addColorStop(0, "#6ec6ff");
-            grad.addColorStop(1, "#1565c0");
+            grad.addColorStop(0, "#87CEEB");
+            grad.addColorStop(1, "#1E90FF");
             ctx.fillStyle = grad;
             ctx.fillRect(0, aguaY, canvas.width, aguaHeight);
 
-            // Dibujar tigre (sentado arriba del agua)
-            ctx.drawImage(tigreImg, config.tigre.x, config.tigre.y, config.tigre.width, config.tigre.height);
+            // Dibujar tigre
+            ctx.drawImage(tigreImg, config.tigre.x, config.tigre.y, 
+                         config.tigre.width, config.tigre.height);
 
-            // Dibujar caña (sale desde el centro inferior del tigre)
+            // Dibujar caña
             if (config.cana.activa) {
+                const startY = config.tigre.y + config.tigre.height - 10;
                 ctx.beginPath();
-                ctx.moveTo(config.tigre.x + config.tigre.width/2, config.tigre.y + config.tigre.height - 5);
-                ctx.lineTo(config.tigre.x + config.tigre.width/2, config.tigre.y + config.tigre.height - 5 + config.cana.longitud);
+                ctx.moveTo(config.tigre.x + config.tigre.width/2, startY);
+                ctx.lineTo(config.tigre.x + config.tigre.width/2, startY + config.cana.longitud);
                 ctx.strokeStyle = '#654321';
                 ctx.lineWidth = 4;
                 ctx.stroke();
-                // Anzuelo
+
                 ctx.beginPath();
-                ctx.arc(config.tigre.x + config.tigre.width/2, config.tigre.y + config.tigre.height - 5 + config.cana.longitud, config.cana.anzueloSize, 0, Math.PI * 2);
+                ctx.arc(config.tigre.x + config.tigre.width/2, 
+                       startY + config.cana.longitud, 
+                       config.cana.anzueloSize, 0, Math.PI * 2);
                 ctx.fillStyle = 'gold';
                 ctx.fill();
             }
 
-            // Dibujar peces
-            peces.forEach(pez => {
+            // Dibujar entidades
+            drawEntities(peces, pezImg);
+            drawEntities(obstaculos, piedraImg);
+        }
+
+        function drawEntities(entities, img) {
+            entities.forEach(entity => {
                 ctx.save();
-                if (pez.direccion === -1) {
-                    ctx.translate(pez.x + pez.width / 2, pez.y + pez.height / 2);
+                if (entity.direccion === -1) {
+                    ctx.translate(entity.x + entity.width/2, entity.y + entity.height/2);
                     ctx.scale(-1, 1);
-                    ctx.drawImage(pezImg, -pez.width/2, -pez.height/2, pez.width, pez.height);
+                    ctx.drawImage(img, -entity.width/2, -entity.height/2, 
+                                entity.width, entity.height);
                 } else {
-                    ctx.drawImage(pezImg, pez.x, pez.y, pez.width, pez.height);
+                    ctx.drawImage(img, entity.x, entity.y, 
+                                entity.width, entity.height);
                 }
                 ctx.restore();
             });
@@ -362,15 +419,33 @@
 
         function checkCollisions() {
             const anzueloX = config.tigre.x + config.tigre.width/2;
-            const anzueloY = config.tigre.y + config.tigre.height - 5 + config.cana.longitud;
+            const anzueloY = config.tigre.y + config.tigre.height - 10 + config.cana.longitud;
+
+            // Colisión con peces
             peces.forEach((pez, index) => {
-                if (anzueloX > pez.x && anzueloX < pez.x + pez.width &&
-                    anzueloY > pez.y && anzueloY < pez.y + pez.height) {
+                if (checkCollision(anzueloX, anzueloY, pez)) {
                     config.puntuacion += 10;
                     peces.splice(index, 1);
                     updateDisplay();
                 }
             });
+
+            // Colisión con obstáculos
+            obstaculos.forEach((obstaculo, index) => {
+                if (checkCollision(anzueloX, anzueloY, obstaculo)) {
+                    config.vidas--;
+                    obstaculos.splice(index, 1);
+                    updateDisplay();
+                    if (config.vidas <= 0) gameOver();
+                }
+            });
+        }
+
+        function checkCollision(x, y, entity) {
+            return x > entity.x && 
+                   x < entity.x + entity.width && 
+                   y > entity.y && 
+                   y < entity.y + entity.height;
         }
 
         function updateDisplay() {
@@ -380,40 +455,17 @@
             });
         }
 
-        function handleControl(e) {
-            e.preventDefault();
-            switch(e.target.id) {
-                case 'left-btn':
-                    config.tigre.x = Math.max(0, config.tigre.x - config.tigre.speed);
-                    break;
-                case 'right-btn':
-                    config.tigre.x = Math.min(canvas.width - config.tigre.width, config.tigre.x + config.tigre.speed);
-                    break;
-                case 'action-btn':
-                    if (!config.cana.activa) {
-                        config.cana.activa = true;
-                        config.cana.longitud = 0;
-                    }
-                    break;
-            }
-        }
-
-        function handleKeyPress(e) {
-            switch(e.key) {
-                case 'ArrowLeft': handleControl({target: {id: 'left-btn'}, preventDefault: ()=>{}}); break;
-                case 'ArrowRight': handleControl({target: {id: 'right-btn'}, preventDefault: ()=>{}}); break;
-                case ' ': handleControl({target: {id: 'action-btn'}, preventDefault: ()=>{}}); break;
-            }
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById('game-over').style.display = 'flex';
+            document.getElementById('final-score').textContent = config.puntuacion;
         }
 
         function resetGame() {
-            gameRunning = false;
-            cancelAnimationFrame(animationFrameId);
             document.getElementById('game-over').style.display = 'none';
             startGame();
         }
 
-        // Iniciar el juego
         initGame();
     </script>
 </body>
