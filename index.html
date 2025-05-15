@@ -208,16 +208,16 @@
         let gameRunning = false;
         let animationFrameId;
 
-        const config = {
+const config = {
             tigre: {
-                width: 100,
-                height: 80,
+                width: 150,  // Tamaño carta ajustado
+                height: 210, // Relación 1:1.4 (carta estándar)
                 x: 0,
                 y: 0
             },
             pez: {
-                width: 60,
-                height: 40,
+                width: 105,  // Tamaño carta ajustado
+                height: 150, // Relación 1:1.4
                 speed: 1.5
             },
             cana: {
@@ -225,7 +225,7 @@
                 longitudMaxima: 0,
                 activa: false,
                 longitud: 0,
-                anzueloSize: 15
+                anzueloSize: 20  // Aumentado para mejor visibilidad
             },
             vidas: 3,
             puntuacion: 0,
@@ -233,18 +233,24 @@
                 spawnRate: 0.005,
                 speed: 1.2,
                 max: 2,
-                size: 40
+                width: 90,   // Tamaño para botella
+                height: 150  // Relación botella
             }
         };
-
+        
+        //
         let aguaY = 0, aguaHeight = 0;
         let peces = [];
         let obstaculos = [];
 
+         // Cargar imágenes
         const tigreImg = new Image();
         tigreImg.src = 'tigre.png';
         const pezImg = new Image();
         pezImg.src = 'pez.png';
+        const botellaImg = new Image();
+        botellaImg.src = 'botella.png';
+
 
         function initGame() {
             resizeCanvas();
@@ -340,13 +346,14 @@
             }
         }
 
+        // Modificar función createEntity para obstáculos
         function createEntity(type) {
             const dir = Math.random() > 0.5 ? 1 : -1;
             return {
-                x: dir === 1 ? -config.obstaculos.size : canvas.width,
-                y: aguaY + Math.random() * (aguaHeight - config.obstaculos.size),
-                width: type === 'pez' ? config.pez.width : config.obstaculos.size,
-                height: type === 'pez' ? config.pez.height : config.obstaculos.size,
+                x: dir === 1 ? -config.obstaculos.width : canvas.width,
+                y: aguaY + Math.random() * (aguaHeight - config.obstaculos.height),
+                width: type === 'pez' ? config.pez.width : config.obstaculos.width,
+                height: type === 'pez' ? config.pez.height : config.obstaculos.height,
                 direccion: dir,
                 velocidad: type === 'pez' ? 
                     config.pez.speed : 
@@ -408,18 +415,20 @@
             });
         }
 
+        // Modificar función drawObstacles
         function drawObstacles() {
             obstaculos.forEach(obstaculo => {
-                ctx.beginPath();
-                ctx.arc(
-                    obstaculo.x + obstaculo.width/2,
-                    obstaculo.y + obstaculo.height/2,
-                    obstaculo.width/2,
-                    0,
-                    Math.PI * 2
-                );
-                ctx.fillStyle = '#808080';
-                ctx.fill();
+                ctx.save();
+                if (obstaculo.direccion === -1) {
+                    ctx.translate(obstaculo.x + obstaculo.width/2, obstaculo.y + obstaculo.height/2);
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(botellaImg, -obstaculo.width/2, -obstaculo.height/2, 
+                                obstaculo.width, obstaculo.height);
+                } else {
+                    ctx.drawImage(botellaImg, obstaculo.x, obstaculo.y, 
+                                obstaculo.width, obstaculo.height);
+                }
+                ctx.restore();
             });
         }
 
