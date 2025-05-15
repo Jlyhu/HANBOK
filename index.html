@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HAN BOK</title>
+    <title>Tigre Pesquero</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -40,7 +40,7 @@
             width: 200px;
             height: auto;
             margin: 0 auto 15px;
-            display: block; /* Logo siempre visible */
+            display: block;
         }
 
         #start-screen {
@@ -56,17 +56,6 @@
             justify-content: center;
             z-index: 20;
             text-align: center;
-        }
-
-        #header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        #logo {
-            width: 200px;
-            height: auto;
-            margin: 0 auto 15px;
         }
 
         #canvas-wrapper {
@@ -187,10 +176,9 @@
 </head>
 <body>
     <div id="game-container">
+        <img id="logo" src="logo.png" alt="Logo del juego">
+        
         <div id="start-screen">
-            <div id="header">
-                <img id="logo" src="logo.png" alt="Logo del juego">
-            </div>
             <button id="start-btn">Comenzar Juego</button>
         </div>
         
@@ -209,16 +197,17 @@
             </div>
         </div>
     </div>
+    
     <div id="controls">
         <button class="control-btn" id="action-btn">⚓</button>
     </div>
+
     <script>
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         let gameRunning = false;
         let animationFrameId;
 
-        // Configuración del juego
         const config = {
             tigre: {
                 width: 100,
@@ -242,8 +231,9 @@
             puntuacion: 0,
             obstaculos: {
                 spawnRate: 0.005,
-                speed: 1,
-                max: 2
+                speed: 1.2,
+                max: 2,
+                size: 40
             }
         };
 
@@ -251,13 +241,10 @@
         let peces = [];
         let obstaculos = [];
 
-        // Cargar imágenes
         const tigreImg = new Image();
         tigreImg.src = 'tigre.png';
         const pezImg = new Image();
         pezImg.src = 'pez.png';
-        const piedraImg = new Image();
-        piedraImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAe0lEQVR4nO3WQQqAMAxE0fz/0yuXgoJNxk46FMF7VYFMXgKqSikfMQMTMAK9s9YHhAqYgRlYgK2iX8DmHNiBw1l7AqezdgGXs3YCl7N2BLez9gOPs/YBr7P2Bp+z9gS/s/YAg7N2B6OzdgWTs3YDs7N2AYuz9g8GpUzqBx/2AAAAAElFTkSuQmCC';
 
         function initGame() {
             resizeCanvas();
@@ -315,7 +302,6 @@
         }
 
         function updateGame() {
-            // Movimiento de la caña
             if (config.cana.activa) {
                 config.cana.longitud += config.cana.velocidad;
                 if (config.cana.longitud >= config.cana.longitudMaxima) {
@@ -325,11 +311,9 @@
                 checkCollisions();
             }
 
-            // Mover peces y obstáculos
             moveEntities(peces);
             moveEntities(obstaculos);
 
-            // Generar nuevos elementos
             generateFish();
             generateObstacles();
         }
@@ -359,10 +343,10 @@
         function createEntity(type) {
             const dir = Math.random() > 0.5 ? 1 : -1;
             return {
-                x: dir === 1 ? -60 : canvas.width,
-                y: aguaY + Math.random() * (aguaHeight - 60),
-                width: 60,
-                height: 60,
+                x: dir === 1 ? -config.obstaculos.size : canvas.width,
+                y: aguaY + Math.random() * (aguaHeight - config.obstaculos.size),
+                width: type === 'pez' ? config.pez.width : config.obstaculos.size,
+                height: type === 'pez' ? config.pez.height : config.obstaculos.size,
                 direccion: dir,
                 velocidad: type === 'pez' ? 
                     config.pez.speed : 
@@ -374,18 +358,18 @@
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Dibujar agua
+            // Agua con degradado
             const grad = ctx.createLinearGradient(0, aguaY, 0, canvas.height);
             grad.addColorStop(0, "#87CEEB");
             grad.addColorStop(1, "#1E90FF");
             ctx.fillStyle = grad;
             ctx.fillRect(0, aguaY, canvas.width, aguaHeight);
 
-            // Dibujar tigre
+            // Tigre
             ctx.drawImage(tigreImg, config.tigre.x, config.tigre.y, 
                          config.tigre.width, config.tigre.height);
 
-            // Dibujar caña
+            // Caña
             if (config.cana.activa) {
                 const startY = config.tigre.y + config.tigre.height - 10;
                 ctx.beginPath();
@@ -403,9 +387,9 @@
                 ctx.fill();
             }
 
-            // Dibujar entidades
+            // Peces y obstáculos
             drawEntities(peces, pezImg);
-            drawEntities(obstaculos, piedraImg);
+            drawObstacles();
         }
 
         function drawEntities(entities, img) {
@@ -424,35 +408,49 @@
             });
         }
 
+        function drawObstacles() {
+            obstaculos.forEach(obstaculo => {
+                ctx.beginPath();
+                ctx.arc(
+                    obstaculo.x + obstaculo.width/2,
+                    obstaculo.y + obstaculo.height/2,
+                    obstaculo.width/2,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fillStyle = '#808080';
+                ctx.fill();
+            });
+        }
+
         function checkCollisions() {
             const anzueloX = config.tigre.x + config.tigre.width/2;
             const anzueloY = config.tigre.y + config.tigre.height - 10 + config.cana.longitud;
 
-            // Colisión con peces
+            // Peces
             peces.forEach((pez, index) => {
-                if (checkCollision(anzueloX, anzueloY, pez)) {
+                if (anzueloX > pez.x && anzueloX < pez.x + pez.width &&
+                    anzueloY > pez.y && anzueloY < pez.y + pez.height) {
                     config.puntuacion += 10;
                     peces.splice(index, 1);
                     updateDisplay();
                 }
             });
 
-            // Colisión con obstáculos
+            // Obstáculos
             obstaculos.forEach((obstaculo, index) => {
-                if (checkCollision(anzueloX, anzueloY, obstaculo)) {
+                const distancia = Math.sqrt(
+                    Math.pow(anzueloX - (obstaculo.x + obstaculo.width/2), 2) +
+                    Math.pow(anzueloY - (obstaculo.y + obstaculo.height/2), 2)
+                );
+                
+                if(distancia < (config.cana.anzueloSize + obstaculo.width/2)) {
                     config.vidas--;
                     obstaculos.splice(index, 1);
                     updateDisplay();
-                    if (config.vidas <= 0) gameOver();
+                    if(config.vidas <= 0) gameOver();
                 }
             });
-        }
-
-        function checkCollision(x, y, entity) {
-            return x > entity.x && 
-                   x < entity.x + entity.width && 
-                   y > entity.y && 
-                   y < entity.y + entity.height;
         }
 
         function updateDisplay() {
