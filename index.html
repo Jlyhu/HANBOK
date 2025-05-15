@@ -1,460 +1,377 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tigre Pesquero</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-        
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            color: white;
             overflow: hidden;
             touch-action: manipulation;
-            background-color: #f0f0f0;
-            height: 100vh;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to bottom, #1a0033, #2a004d);
         }
-        
+
         #game-container {
             position: relative;
             width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
+            max-width: 600px;
+            margin: 20px;
         }
-        
-        #logo-area {
-            height: 60px;
-            background-color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 5px;
-        }
-        
-        #logo-area img {
-            max-height: 100%;
-            max-width: 100%;
-            object-fit: contain;
-        }
-        
-        #game-area {
-            flex: 1;
+
+        #canvas-wrapper {
             position: relative;
+            width: 100%;
+            padding-bottom: 75%;
+            border-radius: 15px;
             overflow: hidden;
-            background: linear-gradient(to bottom, #87CEEB 0%, #1E90FF 100%);
+            box-shadow: 0 0 30px rgba(156, 39, 176, 0.4);
+            background: linear-gradient(to bottom, #87CEEB, #1E90FF);
         }
-        
-        #lives-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 5px;
-            z-index: 2;
-        }
-        
-        #score-container {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: white;
-            font-size: 24px;
-            text-shadow: 2px 2px 2px black;
-            z-index: 2;
-        }
-        
-        #controls-area {
-            height: 80px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background-color: #f8f8f8;
-            padding: 10px;
-            border-top: 1px solid #ddd;
-        }
-        
-        .control-btn {
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
-            border-radius: 50%;
-            border: none;
-            background-color: #4CAF50;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-            touch-action: manipulation;
-        }
-        
-        .life {
-            width: 30px;
-            height: 30px;
-            background-color: #FF5252;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-weight: bold;
-        }
-        
-        #gameCanvas {
+
+        #game-canvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
+        }
+
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid #e0b0ff;
+            background: rgba(156, 39, 176, 0.3);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn:active {
+            background: rgba(156, 39, 176, 0.7);
+            transform: scale(0.95);
+        }
+
+        #game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 0, 51, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 10;
+        }
+
+        #start-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #9c27b0, #673ab7);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            margin: 20px;
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+        }
+
+        #score-display {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 24px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+
+        #lives-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 2;
+        }
+
+        .life {
+            width: 30px;
+            height: 30px;
+            background: url('corazon.png') center/contain no-repeat;
         }
     </style>
 </head>
-    
 <body>
+    <h1>Tigre Pesquero</h1>
+    
     <div id="game-container">
-        <div id="logo-area">
-            <!-- Reemplaza 'logo.jpg' con tu archivo real -->
-            <img src="logo.jpg" alt="Logo del juego">
-        </div>
-        
-        <div id="game-area">
-            <canvas id="gameCanvas"></canvas>
-            <div id="lives-container">
-                <div class="life">♥</div>
-                <div class="life">♥</div>
-                <div class="life">♥</div>
+        <div id="canvas-wrapper">
+            <canvas id="game-canvas"></canvas>
+            
+            <div id="score-display">Puntos: 0</div>
+            <div id="lives-display">
+                <div class="life"></div>
+                <div class="life"></div>
+                <div class="life"></div>
             </div>
-            <div id="score-container">Puntos: 0</div>
-        </div>
-        
-        <div id="controls-area">
-            <button id="left-btn" class="control-btn">←</button>
-            <button id="fish-btn" class="control-btn">⚓</button>
-            <button id="right-btn" class="control-btn">→</button>
+            
+            <div id="game-over">
+                <h2>¡Game Over!</h2>
+                <p>Puntuación final: <span id="final-score">0</span></p>
+                <button id="restart-btn" class="control-btn">↻</button>
+            </div>
         </div>
     </div>
+
+    <button id="start-btn">Comenzar Juego</button>
+    
+    <div id="controls">
+        <button class="control-btn" id="left-btn">←</button>
+        <button class="control-btn" id="action-btn">⚓</button>
+        <button class="control-btn" id="right-btn">→</button>
+    </div>
+
     <script>
-        const canvas = document.getElementById('gameCanvas');
+        const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
-        let gameRunning = true;
-        
-        // Ajustar el tamaño del canvas
-        function resizeCanvas() {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-        
-        // Estado del juego
-        let score = 0;
-        let lives = 3;
+        let gameRunning = false;
+        let animationFrameId;
+
+        // Configuración del juego
+        const config = {
+            tigre: {
+                width: 80,
+                height: 100,
+                speed: 8,
+                x: 0,
+                y: 0
+            },
+            pez: {
+                width: 60,
+                height: 40,
+                speed: 3
+            },
+            cana: {
+                velocidad: 8,
+                longitudMaxima: 300,
+                activa: false,
+                longitud: 0,
+                anzueloSize: 15
+            },
+            vidas: 3,
+            puntuacion: 0
+        };
+
+        // Estados del juego
+        let peces = [];
+        let obstaculos = [];
         
         // Cargar imágenes
         const tigreImg = new Image();
-        tigreImg.src = 'tigre.jpg';
+        tigreImg.src = 'tigre.png';
         const pezImg = new Image();
-        pezImg.src = 'pez.jpg';
-        
-        // Objeto tigre (pescador)
-        const tigre = {
-    x: canvas.width / 2 - 75,
-    y: canvas.height - 150, // Ajusta este valor
-    width: 100,
-    height: 100,
-            speed: 10,
-            draw: function() {
-                ctx.drawImage(tigreImg, this.x, this.y, this.width, this.height);
-            }
-        };
-        
-        // Objeto caña de pescar
-        const cana = {
-            fishing: false,
-            hookX: tigre.x + tigre.width / 2,
-            hookY: tigre.y,
-            hookSize: 10,
-            lineSpeed: 5,
-            lineLength: 0,
-            maxLength: canvas.height - tigre.y - 50,
-            draw: function() {
-                // Dibuja la línea
-                ctx.beginPath();
-                ctx.moveTo(tigre.x + tigre.width / 2, tigre.y + 20);
-                ctx.lineTo(this.hookX, tigre.y + 20 + this.lineLength);
-                ctx.strokeStyle = "#654321";
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                
-                // Dibuja el anzuelo
-                ctx.fillStyle = "gold";
-                ctx.beginPath();
-                ctx.arc(this.hookX, tigre.y + 20 + this.lineLength, this.hookSize, 0, 2 * Math.PI);
-                ctx.fill();
-                
-                // Actualiza la posición del anzuelo
-                if (this.fishing) {
-                    this.lineLength += this.lineSpeed;
-                    if (this.lineLength > this.maxLength) {
-                        this.lineSpeed = -this.lineSpeed;
-                    }
-                    if (this.lineLength <= 0) {
-                        this.fishing = false;
-                        this.lineLength = 0;
-                    }
-                }
-                
-                this.hookX = tigre.x + tigre.width / 2;
-            },
-            cast: function() {
-                if (!this.fishing) {
-                    this.fishing = true;
-                    this.lineLength = 0;
-                    this.lineSpeed = 5;
-                }
-            }
-        };
-        
-        // Peces
-        const peces = [];
-        function crearPez() {
-            const size = 40 + Math.random() * 20;
-            const speed = 2 + Math.random() * 3;
-            const startLeft = Math.random() > 0.5;
-            const pezNuevo = {
-                x: startLeft ? -size : canvas.width,
-                y: Math.random() * (canvas.height - 200) + 100,
-                width: size * 2,
-                height: size,
-                speed: startLeft ? speed : -speed,
-                draw: function() {
-                    // Dibuja el pez horizontalmente (corrige la orientación)
-                    if (this.speed > 0) {
-                        ctx.save();
-                        ctx.scale(-1, 1); // Voltea horizontalmente
-                        ctx.drawImage(pezImg, -this.x - this.width, this.y, this.width, this.height);
-                        ctx.restore();
-                    } else {
-                        ctx.drawImage(pezImg, this.x, this.y, this.width, this.height);
-                    }
-                },
-                move: function() {
-                    this.x += this.speed;
-                    // Si el pez sale del canvas, lo eliminamos
-                    return (this.x > canvas.width + 50 || this.x < -this.width - 50);
-                }
-            };
-            return pezNuevo;
-        }
-        
-        // Obstáculos (generados programáticamente, no imágenes)
-        const obstaculos = [];
-        function crearObstaculo() {
-            const colores = ["#FF5252", "#7C4DFF", "#FF9800", "#607D8B"];
-            const size = 30 + Math.random() * 20;
-            const speed = 1 + Math.random() * 2;
-            const startLeft = Math.random() > 0.5;
-            const color = colores[Math.floor(Math.random() * colores.length)];
-            const tipo = Math.floor(Math.random() * 3); // 0: círculo, 1: cuadrado, 2: triángulo
+        pezImg.src = 'pez.png';
+
+        function initGame() {
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
             
-            const obstaculoNuevo = {
-                x: startLeft ? -size : canvas.width,
-                y: Math.random() * (canvas.height - 200) + 50,
-                size: size,
-                speed: startLeft ? speed : -speed,
-                color: color,
-                tipo: tipo,
-                rotacion: 0,
-                draw: function() {
-                    ctx.save();
-                    ctx.translate(this.x, this.y);
-                    ctx.rotate(this.rotacion);
-                    ctx.fillStyle = this.color;
-                    
-                    if (this.tipo === 0) {
-                        // Círculo
-                        ctx.beginPath();
-                        ctx.arc(0, 0, this.size / 2, 0, Math.PI * 2);
-                        ctx.fill();
-                    } else if (this.tipo === 1) {
-                        // Cuadrado
-                        ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
-                    } else {
-                        // Triángulo
-                        ctx.beginPath();
-                        ctx.moveTo(0, -this.size / 2);
-                        ctx.lineTo(this.size / 2, this.size / 2);
-                        ctx.lineTo(-this.size / 2, this.size / 2);
-                        ctx.closePath();
-                        ctx.fill();
-                    }
-                    
-                    ctx.restore();
-                },
-                move: function() {
-                    this.x += this.speed;
-                    this.rotacion += 0.02;
-                    return (this.x > canvas.width + 50 || this.x < -this.size - 50);
-                }
-            };
-            return obstaculoNuevo;
-        }
-        
-        // Manejo de eventos táctiles y de teclado
-        document.getElementById('left-btn').addEventListener('touchstart', moveLeft);
-        document.getElementById('left-btn').addEventListener('mousedown', moveLeft);
-        document.getElementById('right-btn').addEventListener('touchstart', moveRight);
-        document.getElementById('right-btn').addEventListener('mousedown', moveRight);
-        document.getElementById('fish-btn').addEventListener('touchstart', castFishing);
-        document.getElementById('fish-btn').addEventListener('mousedown', castFishing);
-        
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'ArrowLeft') moveLeft();
-            if (e.key === 'ArrowRight') moveRight();
-            if (e.key === ' ') castFishing();
-        });
-        
-        function moveLeft() {
-            tigre.x = Math.max(0, tigre.x - tigre.speed);
-        }
-        
-        function moveRight() {
-            tigre.x = Math.min(canvas.width - tigre.width, tigre.x + tigre.speed);
-        }
-        
-        function castFishing() {
-            cana.cast();
-        }
-        
-        // Comprueba colisiones entre el anzuelo y los peces
-        function checkCollisions() {
-            if (!cana.fishing) return;
+            // Event listeners
+            document.getElementById('start-btn').addEventListener('click', startGame);
+            document.getElementById('restart-btn').addEventListener('click', resetGame);
             
-            const hookX = cana.hookX;
-            const hookY = tigre.y + 20 + cana.lineLength;
+            ['left-btn', 'right-btn', 'action-btn'].forEach(id => {
+                document.getElementById(id).addEventListener('touchstart', handleControl);
+                document.getElementById(id).addEventListener('mousedown', handleControl);
+            });
             
-            // Comprobar colisiones con peces
-            for (let i = peces.length - 1; i >= 0; i--) {
-                const p = peces[i];
-                if (hookX > p.x && hookX < p.x + p.width &&
-                   hookY > p.y && hookY < p.y + p.height) {
-                    // ¡Pescado atrapado!
-                    peces.splice(i, 1);
-                    score++;
-                    document.getElementById('score-container').innerHTML = "Puntos: " + score;
-                    cana.fishing = false;
-                    cana.lineLength = 0;
-                }
-            }
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        function resizeCanvas() {
+            const wrapper = document.getElementById('canvas-wrapper');
+            canvas.width = wrapper.offsetWidth;
+            canvas.height = wrapper.offsetHeight;
             
-            // Comprobar colisiones con obstáculos
-            for (let i = obstaculos.length - 1; i >= 0; i--) {
-                const o = obstaculos[i];
-                const distancia = Math.sqrt(Math.pow(hookX - o.x, 2) + Math.pow(hookY - o.y, 2));
-                if (distancia < o.size / 2 + cana.hookSize) {
-                    // ¡Colisión con obstáculo!
-                    obstaculos.splice(i, 1);
-                    lives--;
-                    updateLives();
-                    cana.fishing = false;
-                    cana.lineLength = 0;
-                    
-                    if (lives <= 0) {
-                        gameRunning = false;
-                        setTimeout(function() {
-                            alert("¡Juego terminado! Tu puntuación: " + score);
-                            resetGame();
-                        }, 100);
-                    }
-                }
+            config.tigre.y = canvas.height - config.tigre.height - 20;
+            config.tigre.x = canvas.width/2 - config.tigre.width/2;
+        }
+
+        function startGame() {
+            if (!gameRunning) {
+                gameRunning = true;
+                config.vidas = 3;
+                config.puntuacion = 0;
+                peces = [];
+                obstaculos = [];
+                updateDisplay();
+                gameLoop();
             }
         }
-        
-        // Actualiza el display de vidas
-        function updateLives() {
-            const lifeElements = document.querySelectorAll('.life');
-            for (let i = 0; i < lifeElements.length; i++) {
-                if (i < lives) {
-                    lifeElements[i].style.opacity = "1";
-                } else {
-                    lifeElements[i].style.opacity = "0.3";
-                }
-            }
-        }
-        
-        // Reset del juego
-        function resetGame() {
-            score = 0;
-            lives = 3;
-            updateLives();
-            document.getElementById('score-container').innerHTML = "Puntos: 0";
-            peces.length = 0;
-            obstaculos.length = 0;
-            tigre.x = canvas.width / 2 - 75;
-            gameRunning = true;
-            gameLoop();
-        }
-        
-        // Crear nuevos peces periódicamente
-        setInterval(function() {
-            if (gameRunning && peces.length < 5) {
-                peces.push(crearPez());
-            }
-        }, 2000);
-        
-        // Crear nuevos obstáculos periódicamente
-        setInterval(function() {
-            if (gameRunning && obstaculos.length < 3) {
-                obstaculos.push(crearObstaculo());
-            }
-        }, 3000);
-        
-        // Loop principal del juego
+
         function gameLoop() {
             if (!gameRunning) return;
             
+            updateGame();
+            drawGame();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function updateGame() {
+            // Mover caña
+            if (config.cana.activa) {
+                config.cana.longitud += config.cana.velocidad;
+                
+                if (config.cana.longitud >= config.cana.longitudMaxima) {
+                    config.cana.activa = false;
+                    config.cana.longitud = 0;
+                }
+                
+                checkCollisions();
+            }
+            
+            // Mover peces
+            peces.forEach(pez => {
+                pez.x += pez.direccion * pez.velocidad;
+                if (pez.x < -pez.width || pez.x > canvas.width) {
+                    peces.splice(peces.indexOf(pez), 1);
+                }
+            });
+            
+            // Generar nuevos peces
+            if (Math.random() < 0.02) {
+                peces.push({
+                    x: Math.random() > 0.5 ? -60 : canvas.width,
+                    y: Math.random() * (canvas.height - 100),
+                    width: config.pez.width,
+                    height: config.pez.height,
+                    direccion: Math.random() > 0.5 ? 1 : -1,
+                    velocidad: config.pez.speed
+                });
+            }
+        }
+
+        function drawGame() {
             // Limpiar canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Actualizar y dibujar peces
-            for (let i = peces.length - 1; i >= 0; i--) {
-                if (peces[i].move()) {
-                    peces.splice(i, 1);
-                } else {
-                    peces[i].draw();
-                }
+            // Dibujar tigre
+            ctx.drawImage(tigreImg, config.tigre.x, config.tigre.y, 
+                         config.tigre.width, config.tigre.height);
+            
+            // Dibujar caña
+            if (config.cana.activa) {
+                ctx.beginPath();
+                ctx.moveTo(config.tigre.x + config.tigre.width/2, config.tigre.y);
+                ctx.lineTo(config.tigre.x + config.tigre.width/2, 
+                          config.tigre.y + config.cana.longitud);
+                ctx.strokeStyle = '#654321';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                
+                // Dibujar anzuelo
+                ctx.beginPath();
+                ctx.arc(config.tigre.x + config.tigre.width/2, 
+                       config.tigre.y + config.cana.longitud, 
+                       config.cana.anzueloSize, 0, Math.PI * 2);
+                ctx.fillStyle = 'gold';
+                ctx.fill();
             }
             
-            // Actualizar y dibujar obstáculos
-            for (let i = obstaculos.length - 1; i >= 0; i--) {
-                if (obstaculos[i].move()) {
-                    obstaculos.splice(i, 1);
-                } else {
-                    obstaculos[i].draw();
-                }
-            }
-            
-            // Dibujar tigre y caña
-            tigre.draw();
-            cana.draw();
-            
-            // Comprobar colisiones
-            checkCollisions();
-            
-            // Continuar el loop
-            requestAnimationFrame(gameLoop);
+            // Dibujar peces
+            peces.forEach(pez => {
+                ctx.save();
+                if (pez.direccion === -1) ctx.scale(-1, 1);
+                ctx.drawImage(pezImg, pez.direccion === 1 ? pez.x : -pez.x - pez.width, 
+                             pez.y, pez.width, pez.height);
+                ctx.restore();
+            });
         }
-        
-        // Iniciar el juego cuando las imágenes estén cargadas
-        tigreImg.onload = pezImg.onload = function() {
-            gameLoop();
-        };
+
+        function checkCollisions() {
+            const anzueloX = config.tigre.x + config.tigre.width/2;
+            const anzueloY = config.tigre.y + config.cana.longitud;
+            
+            peces.forEach((pez, index) => {
+                if (anzueloX > pez.x && anzueloX < pez.x + pez.width &&
+                   anzueloY > pez.y && anzueloY < pez.y + pez.height) {
+                    config.puntuacion += 10;
+                    peces.splice(index, 1);
+                    updateDisplay();
+                }
+            });
+        }
+
+        function updateDisplay() {
+            document.getElementById('score-display').textContent = `Puntos: ${config.puntuacion}`;
+            document.querySelectorAll('.life').forEach((life, index) => {
+                life.style.opacity = index < config.vidas ? 1 : 0.3;
+            });
+        }
+
+        function handleControl(e) {
+            e.preventDefault();
+            switch(e.target.id) {
+                case 'left-btn': 
+                    config.tigre.x = Math.max(0, config.tigre.x - config.tigre.speed);
+                    break;
+                case 'right-btn': 
+                    config.tigre.x = Math.min(canvas.width - config.tigre.width, 
+                                           config.tigre.x + config.tigre.speed);
+                    break;
+                case 'action-btn':
+                    if (!config.cana.activa) {
+                        config.cana.activa = true;
+                        config.cana.longitud = 0;
+                    }
+                    break;
+            }
+        }
+
+        function handleKeyPress(e) {
+            switch(e.key) {
+                case 'ArrowLeft': handleControl({target: {id: 'left-btn'}}); break;
+                case 'ArrowRight': handleControl({target: {id: 'right-btn'}}); break;
+                case ' ': handleControl({target: {id: 'action-btn'}}); break;
+            }
+        }
+
+        function resetGame() {
+            gameRunning = false;
+            cancelAnimationFrame(animationFrameId);
+            document.getElementById('game-over').style.display = 'none';
+            startGame();
+        }
+
+        // Iniciar el juego
+        initGame();
     </script>
 </body>
 </html>
