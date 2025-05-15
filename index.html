@@ -15,12 +15,13 @@
             overflow: hidden;
             touch-action: manipulation;
             background-color: #f0f0f0;
+            height: 100vh;
         }
         
         #game-container {
             position: relative;
             width: 100%;
-            height: 100vh;
+            height: 100%;
             display: flex;
             flex-direction: column;
         }
@@ -31,20 +32,39 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
+            padding: 5px;
+        }
+        
+        #logo-area img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
         }
         
         #game-area {
-            flex-grow: 1;
+            flex: 1;
             position: relative;
             overflow: hidden;
+            background: linear-gradient(to bottom, #87CEEB 0%, #1E90FF 100%);
         }
         
-        #gameCanvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, #87CEEB 0%, #1E90FF 100%);
+        #lives-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            z-index: 2;
+        }
+        
+        #score-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 24px;
+            text-shadow: 2px 2px 2px black;
+            z-index: 2;
         }
         
         #controls-area {
@@ -70,14 +90,7 @@
             align-items: center;
             cursor: pointer;
             user-select: none;
-        }
-        
-        #lives-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 5px;
+            touch-action: manipulation;
         }
         
         .life {
@@ -92,20 +105,22 @@
             font-weight: bold;
         }
         
-        #score-container {
+        #gameCanvas {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            color: white;
-            font-size: 24px;
-            text-shadow: 2px 2px 2px black;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
     </style>
 </head>
+    
 <body>
     <div id="game-container">
         <div id="logo-area">
-            <div id="logo">Espacio para logo.jpg</div>
+            <!-- Reemplaza 'logo.jpg' con tu archivo real -->
+            <img src="logo.jpg" alt="Logo del juego">
         </div>
         
         <div id="game-area">
@@ -124,7 +139,6 @@
             <button id="right-btn" class="control-btn">→</button>
         </div>
     </div>
-    
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
