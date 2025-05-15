@@ -23,6 +23,7 @@
             align-items: center;
             background: #ffffff;
             padding: 20px;
+            overflow-x: hidden;
         }
 
         #game-container {
@@ -98,7 +99,7 @@
 
         #music-control {
             position: absolute;
-            left: 20px;
+            right: 20px;
             bottom: 20px;
             z-index: 5;
         }
@@ -201,10 +202,6 @@
     </style>
 </head>
 <body>
-    <button id="music-control" class="control-btn">
-        <i class="fas fa-volume-up"></i>
-    </button>
-
     <div id="game-container">
         <img id="logo" src="logo.png" alt="Logo del juego">
         
@@ -232,6 +229,10 @@
         <button class="control-btn" id="action-btn">⚓</button>
     </div>
 
+    <button id="music-control" class="control-btn">
+        <i class="fas fa-volume-up"></i>
+    </button>
+
     <div class="music-message">
         Tu experiencia se complementa con música. Escanea en Spotify y déjate llevar
     </div>
@@ -241,8 +242,12 @@
     <audio id="bg-music" loop>
         <source src="musicaTigre.mp3" type="audio/mpeg">
     </audio>
-    <audio id="fish-sound" src="https://assets.mixkit.co/active_preview/sounds/2096.mp3"></audio>
-    <audio id="bottle-sound" src="https://assets.mixkit.co/active_preview/sounds/2223.mp3"></audio>
+    <audio id="fish-sound">
+        <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU" type="audio/wav">
+    </audio>
+    <audio id="bottle-sound">
+        <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YV" type="audio/wav">
+    </audio>
 
     <script>
         const canvas = document.getElementById('game-canvas');
@@ -370,7 +375,10 @@
         }
 
         function handleKeyPress(e) {
-            if (e.key === ' ') lanzarCana();
+            if (e.key === ' ') {
+                e.preventDefault(); // Previene el scroll
+                lanzarCana();
+            }
         }
 
         function toggleMusic() {
@@ -484,7 +492,6 @@
                     anzueloY > pez.y && anzueloY < pez.y + pez.height) {
                     config.puntuacion += 10;
                     peces.splice(index, 1);
-                    fishSound.currentTime = 0;
                     fishSound.play();
                     updateDisplay();
                 }
@@ -500,7 +507,6 @@
                 if(distancia < (config.cana.anzueloSize + obstaculo.width/2)) {
                     config.vidas--;
                     obstaculos.splice(index, 1);
-                    bottleSound.currentTime = 0;
                     bottleSound.play();
                     updateDisplay();
                     if(config.vidas <= 0) gameOver();
@@ -521,7 +527,7 @@
             document.getElementById('final-score').textContent = config.puntuacion;
         }
 
-        function resetGame() {
+                function resetGame() {
             document.getElementById('game-over').style.display = 'none';
             startGame();
         }
