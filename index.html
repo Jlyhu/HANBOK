@@ -465,8 +465,10 @@
 
             obstaculos.forEach((obstaculo, index) => {
                 const distancia = Math.sqrt(
-                    Math.pow(anzueloX - (obstaculo.x + obstaculo.width/2), 2) +
-                    Math.pow(anzueloY - (obstaculo.y + obstaculo.height/2), 2);
+    Math.pow(anzueloX - (obstaculo.x + obstaculo.width/2), 2) +
+    Math.pow(anzueloY - (obstaculo.y + obstaculo.height/2), 2)
+);
+
                 
                 if(distancia < (config.cana.anzueloSize + obstaculo.width/2)) {
                     config.vidas--;
